@@ -11,19 +11,14 @@ on:
         default: "Pranav"
 jobs:
   setup-and-build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - name: Setup Maven
-        uses: stCarolas/setup-maven@v4.3
-        with:
-          maven-version: 3.6.3
+        run: docker pull maven:3.6.3-openjdk-8
       - run: mvn -version
       - name: Setup Java 8
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '8'
+        run: docker pull openjdk:8-jdk
       - run: |
           java -version
           javac -version
