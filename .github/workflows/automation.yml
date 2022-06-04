@@ -13,8 +13,8 @@ jobs:
   setup-and-build:
     runs-on: self-hosted
     steps:
-      - run: gcloud config list project
       - run: gcloud auth list
+      - run: gcloud config list project
 #      - uses: actions/checkout@v3
 #      - name: Setup Maven
 #        run: docker pull maven:3.6.3-openjdk-8
