@@ -13,26 +13,28 @@ jobs:
   setup-and-build:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Maven
-        run: docker pull maven:3.6.3-openjdk-8
-      - run: docker run maven:3.6.3-openjdk-8 -version
-      - name: Setup Java 8
-        run: docker pull openjdk:8-jdk
-      - run: |
-          java -version
-          javac -version
-      - run: |
-          java -version
-          mvn -version
-          cd packager/
-          mvn clean install
-          echo "-------"
-          echo "-------"
-          echo "Maven packages cleaned"
-          cd ../
-          java -cp packager/target/*:packager/lib/* io.cdap.hub.Tool build
-      - run: ls
+      - run: gcloud config list project
+      - run: gcloud auth list
+#      - uses: actions/checkout@v3
+#      - name: Setup Maven
+#        run: docker pull maven:3.6.3-openjdk-8
+#      - run: docker run maven:3.6.3-openjdk-8 -version
+#      - name: Setup Java 8
+#        run: docker pull openjdk:8-jdk
+#      - run: |
+#          java -version
+#          javac -version
+#      - run: |
+#          java -version
+#          mvn -version
+#          cd packager/
+#          mvn clean install
+#          echo "-------"
+#          echo "-------"
+#          echo "Maven packages cleaned"
+#          cd ../
+#          java -cp packager/target/*:packager/lib/* io.cdap.hub.Tool build
+#      - run: ls
 
 #      - run: |
 #          echo "Hey there, ${{ github.event.inputs.name }}!"
