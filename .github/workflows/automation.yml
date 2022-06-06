@@ -11,7 +11,7 @@ on:
         default: "Pranav"
 jobs:
   setup-and-build:
-    runs-on: self-hosted
+    runs-on: new-runner
     steps:
       - run: gcloud auth list
       - run: gcloud config list project
