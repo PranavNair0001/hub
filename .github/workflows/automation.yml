@@ -13,9 +13,6 @@ jobs:
   setup-and-build:
     runs-on: new-runner
     steps:
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '12'
       - uses: actions/checkout@v2
       - run: mvn -version
       - run: java -version
