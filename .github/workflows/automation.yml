@@ -13,9 +13,10 @@ jobs:
   setup-and-build:
     runs-on: new-runner
     steps:
-      - run: gcloud auth list
-      - run: gcloud config list project
-#      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - run: mvn -version
+      - run: java -version
+      - run: javac -version
 #      - name: Setup Maven
 #        run: docker pull maven:3.6.3-openjdk-8
 #      - run: docker run maven:3.6.3-openjdk-8 -version
@@ -24,17 +25,15 @@ jobs:
 #      - run: |
 #          java -version
 #          javac -version
-#      - run: |
-#          java -version
-#          mvn -version
-#          cd packager/
-#          mvn clean install
-#          echo "-------"
-#          echo "-------"
-#          echo "Maven packages cleaned"
-#          cd ../
-#          java -cp packager/target/*:packager/lib/* io.cdap.hub.Tool build
-#      - run: ls
+      - run: |
+          cd packager/
+          mvn clean install
+          echo "-------"
+          echo "-------"
+          echo "Maven packages cleaned"
+          cd ../
+          java -cp packager/target/*:packager/lib/* io.cdap.hub.Tool build
+      - run: ls
 
 #      - run: |
 #          echo "Hey there, ${{ github.event.inputs.name }}!"
