@@ -1,41 +1,31 @@
 name: hub-release-automation
+
 on:
-  workflow_dispatch:
-    inputs:
-      password:
-        description: "A dummy input parameter"
-        required: true
-      name:
-        description: "Name of person to be greeted"
-        required: true
-        default: "Pranav"
+  workflow_dispatch    # Manual trigger event to execute workflow
+
 jobs:
-  setup-and-build:
-    runs-on: new-runner
+
+  setup-and-build:    # Job to build packages.json, categories.json, and artifact JAR JSON files
+    runs-on: new-runner    # Self hosted runner on GKE cluster
     steps:
-      - uses: actions/checkout@v2.3.4
-      - run: mvn -version
-      - run: java -version
-      - run: javac -version
-#      - name: Setup Maven
-#        run: docker pull maven:3.6.3-openjdk-8
-#      - run: docker run maven:3.6.3-openjdk-8 -version
-#      - name: Setup Java 8
-#        run: docker pull openjdk:8-jdk
-#      - run: |
-#          java -version
-#          javac -version
-      - run: |
+      - name: Repository Checkout    # Action to access file structure of repository in runner
+        uses: actions/checkout@v2.3.4
+
+      - name: Version Checks    # Step to check versions of Maven and Java
+        run: |
+          mvn -version
+          java -version
+          javac - version
+
+      - name: Packager Build    # Step to build the packager with Maven
+        run: |
           cd packager/
           mvn clean package
-          echo "-------"
-          echo "-------"
-          echo "Maven packages cleaned"
-          cd ..
-          java -cp "packager/target/lib/*:packager/target/*" io.cdap.hub.Tool build
-      - run: ls
+          cd ../
 
-#      - run: |
-#          echo "Hey there, ${{ github.event.inputs.name }}!"
-#          sudo bash -f ./.github/scripts/build.sh
-#        shell: bash
+      - name: JAR, JSON Builds    # Step to build artifact JAR JSON files using spec.json, and packages.json at root level
+        run: |
+          java -cp "packager/target/lib/*:packager/target/*" io.cdap.hub.Tool build
+
+      - name: Files List    # Step to list all files, and confirm successful build
+        run: ls
