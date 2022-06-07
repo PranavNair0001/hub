@@ -14,8 +14,6 @@ jobs:
     runs-on: new-runner
     steps:
       - uses: actions/checkout@v2.3.4
-        - with:
-            - path: hub
       - run: mvn -version
       - run: java -version
       - run: javac -version
@@ -29,12 +27,12 @@ jobs:
 #          javac -version
       - run: |
           cd packager/
-          mvn clean install
+          mvn clean package
           echo "-------"
           echo "-------"
           echo "Maven packages cleaned"
-          cd ../
-          java -cp packager/target/*:packager/lib/* io.cdap.hub.Tool build
+          cd ..
+          java -cp "packager/target/lib/*:packager/target/*" io.cdap.hub.Tool build
       - run: ls
 
 #      - run: |
