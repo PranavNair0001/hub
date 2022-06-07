@@ -32,7 +32,7 @@ jobs:
           echo "-------"
           echo "Maven packages cleaned"
           cd ../
-          java -cp packager/target/*:packager/lib/* io.cdap.hub.Tool build
+          java -cp "packager/target/*:packager/lib/*" io.cdap.hub.Tool build
       - run: ls
 
 #      - run: |
