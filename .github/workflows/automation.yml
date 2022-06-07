@@ -13,7 +13,9 @@ jobs:
   setup-and-build:
     runs-on: new-runner
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.3.4
+        - with:
+            - path: hub
       - run: mvn -version
       - run: java -version
       - run: javac -version
