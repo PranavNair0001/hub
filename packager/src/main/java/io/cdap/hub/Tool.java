@@ -41,38 +41,25 @@ public class Tool {
 
   public static void main(String[] args) throws Exception {
 
-    Options options = new Options()
-      .addOption(new Option("h", "help", false, "Print this usage message."))
-      .addOption(new Option("k", "key", true,
-                            "File containing the GPG secret keyring containing the private key to use to " +
-                              "sign package specs and archives. " +
-                              "If none is given, specs and archives will not be signed."))
-      .addOption(new Option("p", "password", true,
-                            "Password for the GPG private key."))
-      .addOption(new Option("i", "keyid", true,
-                            "Id (in hex) of the private key to use to sign specs and archives. " +
-                              "If you are using gpg, you can get this from 'gpg --list-keys --keyid-format LONG'"))
-      .addOption(new Option("d", "dir", true,
-                            "Directory containing packages. Defaults to the current working directory."))
-      .addOption(new Option("f", "force", false,
-                            "Push packages to S3 even if they have not changed. " +
-                              "This may be useful if the signatures have been updated, but the files have not."))
-      .addOption(new Option("y", "dryrun", false,
-                            "Perform a dryrun, which won't actually publish to s3 or invalidate cloudfront objects."))
-      .addOption(new Option("w", "whitelist", true,
-                            "A comma separated whitelist of categories to publish. Any package that does not have " +
-                              "one of these categories will not be published."))
-      .addOption(new Option("s3b", "s3bucket", true, "The S3 bucket to publish packages to."))
-      .addOption(new Option("s3p", "s3prefix", true,
-                            "Optional prefix to use when publishing the s3. Defaults to empty."))
-      .addOption(new Option("s3a", "s3access", true, "Access key to publish to s3."))
-      .addOption(new Option("s3s", "s3secret", true, "Secret key to publish to s3."))
-      .addOption(new Option("s3t", "s3timeout", true, "Timeout in seconds to use when pushing to s3. Defaults to 30."))
-      .addOption(new Option("cfd", "cfdistribution", true, "Cloudfront distribution fronting the s3 bucket."))
-      .addOption(new Option("cfa", "cfaccess", true, "Access key to invalidate cloudfront objects."))
-      .addOption(new Option("cfs", "cfsecret", true, "Secret key to invalidate cloudfront objects."))
-      .addOption(new Option("v", "version", true,
-                            "Sets the version. Defaults to 'v2'. Note that it should not include slashes."));
+    Options options = new Options();
+    options.addOption("h", false, "Print this usage message.");
+    options.addOption("k", true, "File containing the GPG secret keyring containing the private key to use to sign package specs and archives. If none is given, specs and archives will not be signed.");
+    options.addOption("p", true, "Password for the GPG private key.");
+    options.addOption("i", true, "Id (in hex) of the private key to use to sign specs and archives. If you are using gpg, you can get this from 'gpg --list-keys --keyid-format LONG'");
+    options.addOption("d", true, "Directory containing packages. Defaults to the current working directory.");
+    options.addOption("f", false, "Push packages to S3 even if they have not changed. This may be useful if the signatures have been updated, but the files have not.");
+    options.addOption("y", false, "Perform a dryrun, which won't actually publish to s3 or invalidate cloudfront objects.");
+    options.addOption("w", true, "A comma separated whitelist of categories to publish. Any package that does not have one of these categories will not be published.");
+    options.addOption("s3b", true, "The S3 bucket to publish packages to.");
+    options.addOption("s3p", true, "Optional prefix to use when publishing the s3. Defaults to empty.");
+    options.addOption("s3a", true, "Access key to publish to s3.");
+    options.addOption("s3s", true, "Secret key to publish to s3.");
+    options.addOption("s3t", true, "Timeout in seconds to use when pushing to s3. Defaults to 30.");
+    options.addOption("cfd", true, "Cloudfront distribution fronting the s3 bucket.");
+    options.addOption("cfa", true, "Access key to invalidate cloudfront objects.");
+    options.addOption("cfs", true, "Secret key to invalidate cloudfront objects.");
+    options.addOption("v", true, "Sets the version. Defaults to 'v2'. Note that it should not include slashes.");
+    args = new String[]{"-h help", "-k key", "-p password", "-i keyid", "-d dir", "-f force", "-y dryrun", "-w whitelist", "-s3b s3bucket", "-s3p s3prefix", "-s3a s3access", "-s3s s3secret", "-s3t s3timeout", "-cfd cfdistribution", "-cfa cfaccess", "-cfs cfsecret", "-v version"};
 
     CommandLineParser parser = new BasicParser();
     CommandLine commandLine = parser.parse(options, args);
