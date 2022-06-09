@@ -5,6 +5,7 @@
 target/
 packages.json
 categories.json
+script.sh
 
 # Intellij Files & Dir #
 *.iml
