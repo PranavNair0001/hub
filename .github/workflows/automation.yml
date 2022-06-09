@@ -29,9 +29,10 @@ jobs:
 
       - name: Files List    # Step to list all files, and confirm successful build
         run: ls
-      - name: Copy to GCS buckets
+
+      - name: Copy to GCS Buckets    # Step to send all artifacts, packages.json and categories.json to GCS buckets
         run: |
-          gsutil -m cp -r -n packages/ gs://demo-automate-hub-release/
-          gsutil cp categories.json gs://demo-automate-hub-release/categories.json
-          gsutil cp packages.json gs://demo-automate-hub-release/packages.json
+          gsutil -m cp -r -n packages/ gs://project-step-pranav-hub-cdap-io/
+          gsutil cp categories.json gs://project-step-pranav-hub-cdap-io/categories.json
+          gsutil cp packages.json gs://project-step-pranav-hub-cdap-io/packages.json
 
