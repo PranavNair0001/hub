@@ -19,22 +19,27 @@ jobs:
       fail-fast: false
       matrix:
         artifact: ${{ fromJSON(needs.list-files.outputs.matrix) }}
-#    env:
-#      ARTIFACT: ${{ matrix.artifact.path }}
-#      URL: ${{ matrix.artifact.url }}
+    env:
+      ARTIFACT: ${{ matrix.artifact.path }}
+      URL: ${{ matrix.artifact.url }}
+      GTAG: `echo $ARTIFACT | cut -d "/" -f 3`
+      GREPO: $(echo $URL | cut -d "/" -f 4-5)
     steps:
       - run: echo "${{ matrix.artifact.path }} - ${{ matrix.artifact.url }}"
-      - run: export ARTIFACT="${{ matrix.artifact.path }}"
-      - run: export URL="${{ matrix.artifact.url }}"
-      - run: export TAG=`echo "$ARTIFACT" | cut -d "/" -f 3`
-      - run: export REPO=`echo "$URL" | cut -d "/" -f 4-5`
+#      - run: export ARTIFACT="${{ matrix.artifact.path }}"
+#      - run: export URL="${{ matrix.artifact.url }}"
+#      - run: export TAG=`echo "$ARTIFACT" | cut -d "/" -f 3`
+#      - run: export REPO=`echo "$URL" | cut -d "/" -f 4-5`
       - run: |
           echo "$ARTIFACT";
-          echo "$TAG";
+          echo "$GTAG";
           echo "$URL";
-          echo "$REPO";
+          echo "$GREPO";
       - uses: actions/checkout@v2.3.4
         with:
           repository: $REPO
           ref: $TAG
+        env:
+          TAG: `echo $ARTIFACT | cut -d "/" -f 3`
+          REPO: $(echo $URL | cut -d "/" -f 4-5)
       - run: ls
