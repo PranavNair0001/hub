@@ -17,6 +17,6 @@ jobs:
     runs-on: new-runner
     strategy:
       matrix:
-        artifact: ${{ fromJSON(needs.list-files.outputs.matrix) }}
+        artifact: ${{ needs.list-files.outputs.matrix }}
     steps:
       - run: echo ${{ matrix.artifact }}
