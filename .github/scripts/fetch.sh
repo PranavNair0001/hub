@@ -1,6 +1,7 @@
 #!/bin/bash
 
 declare -a toFetch;
+declare -a urls;
 
 for artifact in packages/* ; do
     for artifactVersion in ${artifact}/* ; do
@@ -13,11 +14,13 @@ for artifact in packages/* ; do
             for jarFile in $jarFiles ; do
                 if [ ! -f "${artifactVersion}/${jarFile}" ]; then
                     toFetch[${#toFetch[@]}]=${artifactVersion}/${jarFile}
+                    urls[${#urls[@]}]=`jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json`
                 fi
             done
             for configFile in $configFiles ; do
                 if [ ! -f "${artifactVersion}/${configFile}" ]; then
                     toFetch[${#toFetch[@]}]=${artifactVersion}/${configFile}
+                    urls[${#urls[@]}]=`jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json`
                 fi
             done
         fi
@@ -28,8 +31,14 @@ for file in ${toFetch[@]} ; do
     echo $file;
 done
 
-for file in ${toFetch[@]} ; do
-    json="$json{\"path\":\"$file\"},";
+for url in ${urls[@]} ; do
+    echo $url;
+done
+
+i=0;
+while [ $i -lt ${#toFetch[@]} ]; do
+    json="$json{\"path\":\"${toFetch[$i]}\",\"url\":\"${urls[$i]}\"},";
+    i=`expr $i + 1`;
 done
 
 output="[`echo $json | sed 's/.$//'`]"
