@@ -9,6 +9,7 @@ jobs:
     - run: ./.github/scripts/fetch.sh
     - id: set-matrix
       run: echo "::set-output name=matrix::${output}"
+    - run: sudo rm -r ./
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
