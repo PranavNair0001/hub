@@ -39,5 +39,6 @@ jobs:
       - run: ls
       - run: mvn clean package -DskipTests
       - run: ls
-      - run: cd target/
-      - run: ls
+      - run: |
+          cd target/
+          ls
