@@ -27,3 +27,6 @@ done
 for file in ${toFetch[@]} ; do
     echo $file;
 done
+
+export toFetch
+echo "::set-env name=toFetch::${toFetch[@]}"
