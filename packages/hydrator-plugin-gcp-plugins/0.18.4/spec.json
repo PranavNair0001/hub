@@ -38,6 +38,11 @@
           "name": "jar",
           "value": "google-cloud-0.18.4.jar",
           "canModify": false
+        },
+        {
+          "name": "repo_url",
+          "value": "https://github.com/data-integrations/google-cloud",
+          "canModify": false
         }
       ]
     }
