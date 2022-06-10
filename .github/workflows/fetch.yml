@@ -21,25 +21,19 @@ jobs:
         artifact: ${{ fromJSON(needs.list-files.outputs.matrix) }}
     env:
       ARTIFACT: ${{ matrix.artifact.path }}
-      URL: ${{ matrix.artifact.url }}
-      GTAG: $(echo $ARTIFACT | cut -d "/" -f 3)
-      GREPO: $(echo $URL | cut -d "/" -f 4-5)
+      URL: ${{ matrix.artifact.repo.url }}
+      TAG: ${{ matrix.artifact.repo.tag }}
+      REPO: ${{ matrix.artifact.repo.repo }}
+      OWNER: ${{ matrix.artifact.repo.owner }}
     steps:
-      - run: echo "${{ matrix.artifact.path }} - ${{ matrix.artifact.url }}"
-#      - run: export ARTIFACT="${{ matrix.artifact.path }}"
-#      - run: export URL="${{ matrix.artifact.url }}"
-#      - run: export TAG=`echo "$ARTIFACT" | cut -d "/" -f 3`
-#      - run: export REPO=`echo "$URL" | cut -d "/" -f 4-5`
       - run: |
           echo "$ARTIFACT";
-          echo "$GTAG";
+          echo "$TAG";
           echo "$URL";
-          echo "$GREPO";
+          echo "$REPO";
+          echo "$OWNER";
       - uses: actions/checkout@v2.3.4
         with:
-          repository: $REPO
+          repository: "${OWNER}/${REPO}"
           ref: $TAG
-        env:
-          TAG: $(echo $ARTIFACT | cut -d "/" -f 3)
-          REPO: $(echo $URL | cut -d "/" -f 4-5)
       - run: ls
