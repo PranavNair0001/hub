@@ -38,3 +38,6 @@ jobs:
           ref: ${{ matrix.artifact.repo.tag }}
       - run: ls
       - run: mvn clean package -DskipTests
+      - run: ls
+      - run: cd target/
+      - run: ls
