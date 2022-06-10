@@ -42,3 +42,7 @@ jobs:
       - run: |
           cd target/
           ls
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.artifact.path }}
+          path: ${{ matrix.artifact.target_path }}
