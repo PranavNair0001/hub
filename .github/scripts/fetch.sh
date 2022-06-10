@@ -32,7 +32,7 @@ for file in ${toFetch[@]} ; do
     json="$json{\"path\":\"$file\"},";
 done
 
-output="{\"files\":[`echo $json | sed 's/.$//'`]}"
+output="[`echo $json | sed 's/.$//'`]"
 echo $output
 
 export output
