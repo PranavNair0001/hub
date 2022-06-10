@@ -8,7 +8,7 @@ jobs:
       - run: chmod +x ./.github/scripts/fetch.sh
       - run: ./.github/scripts/fetch.sh
       - id: set-matrix
-        run: echo "::set-output name=matrix::${toFetch[@]}"
+        run: echo "::set-output name=matrix::${output}"
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
