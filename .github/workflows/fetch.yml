@@ -34,6 +34,6 @@ jobs:
           echo "$OWNER";
       - uses: actions/checkout@v2.3.4
         with:
-          repository: "${OWNER}/${REPO}"
-          ref: $TAG
+          repository: ${{ matrix.artifact.repo.checkout }}
+          ref: ${{ matrix.artifact.repo.tag }}
       - run: ls
