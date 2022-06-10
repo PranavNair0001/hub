@@ -19,4 +19,4 @@ jobs:
       matrix:
         artifact: ${{ fromJSON(needs.list-files.outputs.matrix) }}
     steps:
-    - run: echo ${{ matrix.artifact }}
+    - run: echo ${{ matrix.artifact.path }}
