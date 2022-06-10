@@ -37,7 +37,7 @@ done
 
 i=0;
 while [ $i -lt ${#toFetch[@]} ]; do
-    json="$json{\"path\":\"${toFetch[$i]}\",\"repo\":{\"url\":\"${urls[$i]}\",\"owner\":\"`echo ${urls[$i]} | cut -d "/" -f 4`\",\"repo\":\"`echo ${urls[$i]} | cut -d "/" -f 5`\",\"tag\":\"`echo ${toFetch[$i]} | cut -d "/" -f 3`\",\"checkout\":\"`echo ${urls[$i]} | cut -d "/" -f 4-5`\"}},";
+    json="$json{\"path\":\"${toFetch[$i]}\",\"repo\":{\"url\":\"${urls[$i]}\",\"owner\":\"`echo ${urls[$i]} | cut -d "/" -f 4`\",\"repo\":\"`echo ${urls[$i]} | cut -d "/" -f 5`\",\"tag\":\"v`echo ${toFetch[$i]} | cut -d "/" -f 3`\",\"checkout\":\"`echo ${urls[$i]} | cut -d "/" -f 4-5`\"}},";
     i=`expr $i + 1`;
 done
 
