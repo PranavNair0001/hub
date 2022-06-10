@@ -32,5 +32,5 @@ for file in ${toFetch[@]} ; do
     json="$json'$file',";
 done
 
-output="[`echo $json | sed 's/.$//'`]"
+output="{[`echo $json | sed 's/.$//'`]}"
 echo $output
