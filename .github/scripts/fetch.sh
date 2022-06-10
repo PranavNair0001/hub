@@ -29,8 +29,11 @@ for file in ${toFetch[@]} ; do
 done
 
 for file in ${toFetch[@]} ; do
-    json="$json'$file',";
+    json="$json{\\\"path\":\\\"$file\\\"},";
 done
 
-output="{[`echo $json | sed 's/.$//'`]}"
+output="{\\\"files\\\":[`echo $json | sed 's/.$//'`]}"
 echo $output
+
+export output
+echo "output=${output}" >> $GITHUB_ENV
