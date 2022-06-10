@@ -37,3 +37,4 @@ jobs:
           repository: ${{ matrix.artifact.repo.checkout }}
           ref: ${{ matrix.artifact.repo.tag }}
       - run: ls
+      - run: mvn clean package -DskipTests
