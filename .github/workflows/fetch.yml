@@ -22,7 +22,7 @@ jobs:
     env:
       ARTIFACT: ${{ matrix.artifact.path }}
       URL: ${{ matrix.artifact.url }}
-      GTAG: `echo $ARTIFACT | cut -d "/" -f 3`
+      GTAG: $(echo $ARTIFACT | cut -d "/" -f 3)
       GREPO: $(echo $URL | cut -d "/" -f 4-5)
     steps:
       - run: echo "${{ matrix.artifact.path }} - ${{ matrix.artifact.url }}"
@@ -40,6 +40,6 @@ jobs:
           repository: $REPO
           ref: $TAG
         env:
-          TAG: `echo $ARTIFACT | cut -d "/" -f 3`
+          TAG: $(echo $ARTIFACT | cut -d "/" -f 3)
           REPO: $(echo $URL | cut -d "/" -f 4-5)
       - run: ls
