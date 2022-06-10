@@ -29,4 +29,4 @@ for file in ${toFetch[@]} ; do
 done
 
 export toFetch
-echo "::set-env name=toFetch::${toFetch[@]}"
+echo "toFetch=${toFetch[@]}" >> $GITHUB_ENV
