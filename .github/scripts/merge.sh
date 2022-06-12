@@ -1,7 +1,6 @@
 #!/bin/bash
 
 declare -a toFetch;
-declare -a urls;
 
 for artifact in packages/* ; do
     for artifactVersion in ${artifact}/* ; do
@@ -14,36 +13,27 @@ for artifact in packages/* ; do
             for jarFile in $jarFiles ; do
                 if [ ! -f "${artifactVersion}/${jarFile}" ]; then
                     toFetch[${#toFetch[@]}]=${artifactVersion}/${jarFile}
-                    urls[${#urls[@]}]=`jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json`
                 fi
             done
             for configFile in $configFiles ; do
                 if [ ! -f "${artifactVersion}/${configFile}" ]; then
                     toFetch[${#toFetch[@]}]=${artifactVersion}/${configFile}
-                    urls[${#urls[@]}]=`jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json`
                 fi
             done
         fi
     done
 done
 
-echo "Missing files before retrieval: "
+for file in ${toFetch[@]} ; do
+    fileName=`echo $file | cut -d "/" -f 4`
+    if [ -f "artifacts/${fileName}" ]; then
+        mv artifacts/${fileName} $file
+    else
+        echo "$file : not retrieved"
+    fi
+done
+
+echo "Missing files after retrieval: "
 for file in ${toFetch[@]} ; do
     echo $file;
 done
-
-for url in ${urls[@]} ; do
-    echo $url;
-done
-
-i=0;
-while [ $i -lt ${#toFetch[@]} ]; do
-    json="$json{\"path\":\"${toFetch[$i]}\",\"target_path\":\"target/`echo "${toFetch[$i]}" | cut -d "/" -f 4`\",\"artifact\":\"`echo "${toFetch[$i]}" | cut -d "/" -f 4`\",\"repo\":{\"url\":\"${urls[$i]}\",\"owner\":\"`echo ${urls[$i]} | cut -d "/" -f 4`\",\"repo\":\"`echo ${urls[$i]} | cut -d "/" -f 5`\",\"tag\":\"v`echo ${toFetch[$i]} | cut -d "/" -f 3`\",\"checkout\":\"`echo ${urls[$i]} | cut -d "/" -f 4-5`\"}},";
-    i=`expr $i + 1`;
-done
-
-output="[`echo $json | sed 's/.$//'`]"
-echo $output
-
-export output
-echo "output=${output}" >> $GITHUB_ENV
