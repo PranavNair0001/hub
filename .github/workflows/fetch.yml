@@ -49,6 +49,7 @@ jobs:
 
   merge-files:
     needs: build-files
+    if: always()
     runs-on: new-runner
     steps:
       - uses: actions/checkout@v2.3.4
