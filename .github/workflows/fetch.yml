@@ -46,3 +46,16 @@ jobs:
         with:
           name: ${{ matrix.artifact.artifact }}
           path: ${{ matrix.artifact.target_path }}
+
+  merge-files:
+    needs: build-files
+    runs-on: new-runner
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/download-artifact@v3
+        with:
+          path: artifacts/
+      - run: |
+          ls
+          cd artifacts/
+          ls
