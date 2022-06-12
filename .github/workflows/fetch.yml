@@ -26,22 +26,11 @@ jobs:
       REPO: ${{ matrix.artifact.repo.repo }}
       OWNER: ${{ matrix.artifact.repo.owner }}
     steps:
-      - run: |
-          echo "$ARTIFACT";
-          echo "$TAG";
-          echo "$URL";
-          echo "$REPO";
-          echo "$OWNER";
       - uses: actions/checkout@v2.3.4
         with:
           repository: ${{ matrix.artifact.repo.checkout }}
           ref: ${{ matrix.artifact.repo.tag }}
-      - run: ls
       - run: mvn clean package -DskipTests
-      - run: ls
-      - run: |
-          cd target/
-          ls
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.artifact.artifact }}
@@ -56,7 +45,9 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           path: artifacts/
+      - run: chmod +x ./.github/scripts/merge.sh
+      - run: ./.github/scripts/merge.sh
       - run: |
           ls
-          cd artifacts/
+          rm -r artifacts/
           ls
