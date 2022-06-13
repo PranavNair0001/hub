@@ -44,12 +44,12 @@ for artifact in packages/* ; do
             configFiles=($(jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "config").value' ${artifactVersion}/spec.json));
             for jarFile in $jarFiles ; do
                 if [ ! -f "${artifactVersion}/${jarFile}" ]; then
-                    missing[${#toFetch[@]}]=${artifactVersion}/${jarFile}
+                    missing[${#missing[@]}]=${artifactVersion}/${jarFile}
                 fi
             done
             for configFile in $configFiles ; do
                 if [ ! -f "${artifactVersion}/${configFile}" ]; then
-                    missing[${#toFetch[@]}]=${artifactVersion}/${configFile}
+                    missing[${#missing[@]}]=${artifactVersion}/${configFile}
                 fi
             done
         fi
