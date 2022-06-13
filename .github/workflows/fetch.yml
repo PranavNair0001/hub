@@ -30,7 +30,7 @@ jobs:
         with:
           repository: ${{ matrix.artifact.repo.checkout }}
           ref: ${{ matrix.artifact.repo.tag }}
-      - run: mvn clean package -DskipTests
+      - run: mvn clean package # -DskipTests
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.artifact.artifact }}
