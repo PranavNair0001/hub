@@ -26,6 +26,10 @@ done
 
 for file in ${toFetch[@]} ; do
     fileName=`echo $file | cut -d "/" -f 4`
+    echo $fileName;
+    cd artifacts/
+    ls
+    cd ../
     if [ -f "artifacts/${fileName}" ]; then
         mv artifacts/${fileName} $file
     else
