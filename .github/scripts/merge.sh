@@ -28,6 +28,9 @@ for file in ${toFetch[@]} ; do
     filePath="artifacts/`echo $file | cut -d "/" -f 4`";
     echo "${filePath} :";
     cat ${filePath} | less
+    cd ${filePath}
+    ls
+    cd ../../
     if [ -f "${filePath}" ]; then
         mv ${filePath} $file
     else
