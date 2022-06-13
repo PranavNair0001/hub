@@ -45,9 +45,6 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           path: artifacts/
-      - run: chmod +x ./.github/scripts/merge.sh
+      - run: chmod +rwx ./.github/scripts/merge.sh
       - run: ./.github/scripts/merge.sh
-      - run: |
-          ls
-          rm -r artifacts/
-          ls
+      - run: rm -r artifacts/
