@@ -26,14 +26,11 @@ jobs:
       REPO: ${{ matrix.artifact.repo.repo }}
       OWNER: ${{ matrix.artifact.repo.owner }}
     steps:
-#      - uses: actions/checkout@v2.3.4
-#        with:
-#          repository: ${{ matrix.artifact.repo.checkout }}
-#          ref: ${{ matrix.artifact.repo.tag }}
-      - run: git clone -b ${{ matrix.artifact.repo.tag }} " ${{ matrix.artifact.repo.url }}.git"
-      - run: |
-          cd ${{ matrix.artifact.repo.repo }}
-          mvn clean package -DskipTests
+      - uses: actions/checkout@v2.3.4
+        with:
+          repository: ${{ matrix.artifact.repo.checkout }}
+          ref: ${{ matrix.artifact.repo.tag }}
+      - run: mvn clean package -DskipTests
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.artifact.artifact }}
