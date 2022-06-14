@@ -15,12 +15,14 @@ for artifact in packages/* ; do
               for jarFile in $jarFiles ; do
                   if [ ! -f "${artifactVersion}/${jarFile}" ]; then
                       toFetch[${#toFetch[@]}]=${artifactVersion}/${jarFile}
+                      jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json
                       urls[${#urls[@]}]=`jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json`
                   fi
               done
               for configFile in $configFiles ; do
                   if [ ! -f "${artifactVersion}/${configFile}" ]; then
                       toFetch[${#toFetch[@]}]=${artifactVersion}/${configFile}
+                      jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json
                       urls[${#urls[@]}]=`jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json`
                   fi
               done
