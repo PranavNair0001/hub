@@ -60,3 +60,7 @@ echo "Missing files after retrieval: "
 for file in ${missing[@]} ; do
     echo $file;
 done
+
+if [ -d artifacts ]; then
+    rm -r artifacts/
+fi
