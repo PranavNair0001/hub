@@ -15,6 +15,7 @@ jobs:
 
   build-files:
     needs: list-files
+    if: ${{ needs.list-files.outputs.matrix != '[]' && needs.list-files.outputs.matrix != '' }}
     runs-on: new-runner
     strategy:
       fail-fast: false
