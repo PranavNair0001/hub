@@ -49,4 +49,5 @@ jobs:
           path: artifacts/
       - run: chmod +rwx ./.github/scripts/merge.sh
       - run: ./.github/scripts/merge.sh
-      - run: if [ -d artifacts ]; then rm -r artifacts/ ;
+      - run: chmod +rwx ./.github/scripts/clean.sh
+      - run: ./.github/scripts/clean.sh
