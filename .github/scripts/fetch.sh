@@ -5,25 +5,28 @@ declare -a urls;
 
 for artifact in packages/* ; do
     for artifactVersion in ${artifact}/* ; do
-        if [ ! -f "${artifactVersion}/spec.json" ]; then
-            echo "${artifactVersion}/spec.json does not exist";
-            exit 0;
-        else
-            jarFiles=($(jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "jar").value' ${artifactVersion}/spec.json));
-            configFiles=($(jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "config").value' ${artifactVersion}/spec.json));
-            for jarFile in $jarFiles ; do
-                if [ ! -f "${artifactVersion}/${jarFile}" ]; then
-                    toFetch[${#toFetch[@]}]=${artifactVersion}/${jarFile}
-                    urls[${#urls[@]}]=`jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json`
-                fi
-            done
-            for configFile in $configFiles ; do
-                if [ ! -f "${artifactVersion}/${configFile}" ]; then
-                    toFetch[${#toFetch[@]}]=${artifactVersion}/${configFile}
-                    urls[${#urls[@]}]=`jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json`
-                fi
-            done
-        fi
+      if [ -d "${artifactVersion}" ]; then
+          if [ ! -f "${artifactVersion}/spec.json" ]; then
+              echo "${artifactVersion}/spec.json does not exist";
+              exit 0;
+          else
+              jarFiles=($(jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "jar").value' ${artifactVersion}/spec.json));
+              configFiles=($(jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "config").value' ${artifactVersion}/spec.json));
+              for jarFile in $jarFiles ; do
+                  if [ ! -f "${artifactVersion}/${jarFile}" ]; then
+                      toFetch[${#toFetch[@]}]=${artifactVersion}/${jarFile}
+                      urls[${#urls[@]}]=`jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json`
+                  fi
+              done
+              for configFile in $configFiles ; do
+                  if [ ! -f "${artifactVersion}/${configFile}" ]; then
+                      toFetch[${#toFetch[@]}]=${artifactVersion}/${configFile}
+                      urls[${#urls[@]}]=`jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json`
+                  fi
+              done
+          fi
+      fi
+
     done
 done
 
