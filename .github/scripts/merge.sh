@@ -47,6 +47,8 @@ for file in ${toFetch[@]} ; do
     fi
 done
 
+mv artifacts/packages.json/packages.json packages.json
+
 for artifact in packages/* ; do
     for artifactVersion in ${artifact}/* ; do
       if [ -d "${artifactVersion}" ]; then

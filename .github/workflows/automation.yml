@@ -5,34 +5,121 @@ on:
 
 jobs:
 
-  setup-and-build:    # Job to build packages.json, categories.json, and artifact JAR JSON files
+  setup-and-build:    # Job to build packages.json file
     runs-on: new-runner    # Self hosted runner on GKE cluster
     steps:
-      - name: Repository Checkout    # Action to access file structure of repository in runner
-        uses: actions/checkout@v2.3.4
 
-      - name: Version Checks    # Step to check versions of Maven and Java
-        run: |
-          mvn -version
-          java -version
-          javac -version
+    - name: Repository Checkout    # Action to access file structure of repository in runner
+      uses: actions/checkout@v2.3.4
 
-      - name: Packager Build    # Step to build the packager with Maven
-        run: |
-          cd packager/
-          mvn clean package
-          cd ../
+    - name: Version Checks    # Step to check versions of Maven and Java
+      run: |
+        mvn -version
+        java -version
+        javac -version
 
-      - name: JAR, JSON Builds    # Step to build artifact JAR JSON files using spec.json, and packages.json at root level
-        run: |
-          java -cp "packager/target/lib/*:packager/target/*" io.cdap.hub.Tool build
+    - name: Packager Build    # Step to build the packager with Maven
+      run: |
+        cd packager/
+        mvn clean package
+        cd ../
 
-      - name: Files List    # Step to list all files, and confirm successful build
-        run: ls
+    - name: packages Builds    # Step to build packages.json at root level using Packager
+      run: |
+        java -cp "packager/target/lib/*:packager/target/*" io.cdap.hub.Tool build
 
-      - name: Copy to GCS Buckets    # Step to send all artifacts, packages.json and categories.json to GCS buckets
-        run: |
-          gsutil -m cp -r -n packages/ gs://project-step-pranav-hub-cdap-io/
-          gsutil cp categories.json gs://project-step-pranav-hub-cdap-io/categories.json
-          gsutil cp packages.json gs://project-step-pranav-hub-cdap-io/packages.json
+    - name: Files List    # Step to list all files, and confirm successful build
+      run: ls
+
+    - name: Store packages.json as Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: packages.json
+        path: ./packages.json
+
+#      - name: Copy to GCS Buckets    # Step to send all artifacts, packages.json and categories.json to GCS buckets
+#        run: |
+#          gsutil -m cp -r -n packages/ gs://project-step-pranav-hub-cdap-io/
+#          gsutil cp categories.json gs://project-step-pranav-hub-cdap-io/categories.json
+#          gsutil cp packages.json gs://project-step-pranav-hub-cdap-io/packages.json
+
+  list-files:
+    needs: setup-and-build
+    runs-on: new-runner
+    steps:
+
+    - name: Repository Checkout    # Action to access file structure of repository in runner
+      uses: actions/checkout@v2.3.4
+
+    - name: GCS Bucket Sync    # Step to sync local file structure with contents of GCS Buckets
+      run: gsutil -m rsync -i -r gs://project-step-pranav-hub-cdap-io/packages/ ./packages/
+
+    - name: Setting Permissions    # Step to enable execute permission for fetch.sh script
+      run: chmod +x ./.github/scripts/fetch.sh
+
+    - name: Listing Missing Files    # Step to execute fetch.sh script to get list of all missing files
+      run: ./.github/scripts/fetch.sh
+
+    - name: Setting Output    # Step to set resultant list as output of job
+      id: set-matrix
+      run: echo "::set-output name=matrix::${output}"
+
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+  fetch-files:
+    needs: list-files
+    if: ${{ needs.list-files.outputs.matrix != '[]' && needs.list-files.outputs.matrix != '' }}
+    runs-on: new-runner
+
+    strategy:
+      fail-fast: false
+      matrix:
+        artifact: ${{ fromJSON(needs.list-files.outputs.matrix) }}
+
+    env:
+      ID: ${{ matrix.artifact.repo.id }}
+      VERSION: ${{ matrix.artifact.repo.version }}
+      EXTENSION: ${{ matrix.artifact.repo.file_type }}
+
+    steps:
+
+    - name: Fetch Missing File    # Step to fetch missing file from Maven Central Repository
+      run: mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/
+
+    - name: Upload File    # Action to upload the fetched missing file as an artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.artifact.artifact }}
+        path: ${{ matrix.artifact.target_path }}
+
+  merge-files:
+    needs: fetch-files
+    if: always()
+    runs-on: new-runner
+    steps:
+
+    - name: Repository Checkout    # Action to access file structure of repository in runner
+      uses: actions/checkout@v2.3.4
+
+    - name: GCS Bucket Sync    # Step to sync local file structure with contents of GCS Buckets
+      run: gsutil -m rsync -i -r gs://project-step-pranav-hub-cdap-io/packages/ ./packages/
+
+    - name: Download Artifact    # Action to download all the fetched missing files to a temporary artifacts directory
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts/
+
+    - name: Setting Permissions    # Step to enable execute permission for merge.sh script
+      run: chmod +x ./.github/scripts/merge.sh
+
+    - name: Merging Fetched Files    # Step to execute merge.sh script to place all the fetched missing files in appropriate directory
+      run: ./.github/scripts/merge.sh
+
+    - name: GCS Bucket Sync    # Step to sync and send all local files to GCS Bucket
+      run: |
+        gsutil -m rsync -r packages/ gs://project-step-pranav-hub-cdap-io/packages/
+        gsutil cp categories.json gs://project-step-pranav-hub-cdap-io/categories.json
+        gsutil cp packages.json gs://project-step-pranav-hub-cdap-io/packages.json
+
 
