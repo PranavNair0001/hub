@@ -1,7 +1,7 @@
 #!/bin/bash
 
 declare -a toFetch;
-declare -a urls;
+declare -a ids;
 
 for artifact in packages/* ; do
     for artifactVersion in ${artifact}/* ; do
@@ -14,16 +14,24 @@ for artifact in packages/* ; do
               configFiles=($(jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "config").value' ${artifactVersion}/spec.json));
               for jarFile in $jarFiles ; do
                   if [ ! -f "${artifactVersion}/${jarFile}" ]; then
-                      toFetch[${#toFetch[@]}]=${artifactVersion}/${jarFile}
-#                      jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json
-                      urls[${#urls[@]}]=`jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json`
+                    if [ -f "${artifact}/build.yaml" ]; then
+                        toFetch[${#toFetch[@]}]=${artifactVersion}/${jarFile}
+                        ids[${#ids[@]}]="`yq eval '.maven-central.groupId' ${artifact}/build.yaml`:`yq eval '.maven-central.artifactId' ${artifact}/build.yaml`"
+                    else
+                        echo "${artifact}/build.yaml does not exist";
+                        exit 0;
+                    fi
                   fi
               done
               for configFile in $configFiles ; do
                   if [ ! -f "${artifactVersion}/${configFile}" ]; then
-                      toFetch[${#toFetch[@]}]=${artifactVersion}/${configFile}
-#                      jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json
-                      urls[${#urls[@]}]=`jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "repo_url").value' ${artifactVersion}/spec.json`
+                      if [ -f "${artifact}/build.yaml" ]; then
+                          toFetch[${#toFetch[@]}]=${artifactVersion}/${configFile}
+                          ids[${#ids[@]}]="`yq eval '.maven-central.groupId' ${artifact}/build.yaml`:`yq eval '.maven-central.artifactId' ${artifact}/build.yaml`"
+                      else
+                          echo "${artifact}/build.yaml does not exist";
+                          exit 0;
+                      fi
                   fi
               done
           fi
@@ -37,13 +45,15 @@ for file in ${toFetch[@]} ; do
     echo $file;
 done
 
-for url in ${urls[@]} ; do
-    echo $url;
+for id in ${ids[@]} ; do
+    echo $id;
 done
 
 i=0;
 while [ $i -lt ${#toFetch[@]} ]; do
-    json="$json{\"path\":\"${toFetch[$i]}\",\"target_path\":\"target/`echo "${toFetch[$i]}" | cut -d "/" -f 4`\",\"artifact\":\"`echo "${toFetch[$i]}" | cut -d "/" -f 4`\",\"repo\":{\"url\":\"${urls[$i]}\",\"owner\":\"`echo ${urls[$i]} | cut -d "/" -f 4`\",\"repo\":\"`echo ${urls[$i]} | cut -d "/" -f 5`\",\"tag\":\"v`echo ${toFetch[$i]} | cut -d "/" -f 3`\",\"checkout\":\"`echo ${urls[$i]} | cut -d "/" -f 4-5`\"}},";
+    filename=$(basename -- "${toFetch[$i]}")
+    extension="${filename##*.}"
+    json="$json{\"path\":\"${toFetch[$i]}\",\"target_path\":\"artifact/`echo "${toFetch[$i]}" | cut -d "/" -f 4`\",\"artifact\":\"`echo "${toFetch[$i]}" | cut -d "/" -f 4`\",\"repo\":{\"id\":\"${ids[$i]}\"\"version\":\"`echo "${toFetch[$i]}" | cut -d "/" -f 3`\",\"file_type\":\"${extension}\"}},";
     i=`expr $i + 1`;
 done
 

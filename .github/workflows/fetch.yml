@@ -13,7 +13,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
-  build-files:
+  fetch-files:
     needs: list-files
     if: ${{ needs.list-files.outputs.matrix != '[]' && needs.list-files.outputs.matrix != '' }}
     runs-on: new-runner
@@ -21,26 +21,27 @@ jobs:
       fail-fast: false
       matrix:
         artifact: ${{ fromJSON(needs.list-files.outputs.matrix) }}
+    env:
+      ID: ${{ matrix.artifact.repo.id }}
+      VERSION: ${{ matrix.artifact.repo.version }}
+      EXTENSION: ${{ matrix.artifact.repo.file_type }}
     steps:
-      - uses: actions/checkout@v2.3.4
-        with:
-          repository: ${{ matrix.artifact.repo.checkout }}
-          ref: ${{ matrix.artifact.repo.tag }}
-      - run: mvn clean package -DskipTests
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.artifact.artifact }}
-          path: ${{ matrix.artifact.target_path }}
+    - run: mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/
+    - uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.artifact.artifact }}
+        path: ${{ matrix.artifact.target_path }}
 
   merge-files:
-    needs: build-files
+    needs: fetch-files
     if: always()
     runs-on: new-runner
     steps:
-      - uses: actions/checkout@v2.3.4
-      - run: gsutil -m rsync -i -r gs://project-step-pranav-hub-cdap-io/packages/ ./packages/
-      - uses: actions/download-artifact@v3
-        with:
-          path: artifacts/
-      - run: chmod +rwx ./.github/scripts/merge.sh
-      - run: ./.github/scripts/merge.sh
+    - uses: actions/checkout@v2.3.4
+    - run: gsutil -m rsync -i -r gs://project-step-pranav-hub-cdap-io/packages/ ./packages/
+    - uses: actions/download-artifact@v3
+      with:
+        path: artifacts/
+    - run: chmod +rwx ./.github/scripts/merge.sh
+    - run: ./.github/scripts/merge.sh
+    - run: gsutil -m rsync -r ./packages/ gs://project-step-pranav-hub-cdap-io/packages/

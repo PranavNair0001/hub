@@ -61,6 +61,11 @@ for file in ${missing[@]} ; do
     echo $file;
 done
 
+if [ $missing != '' ]; then
+    echo "Above file(s) yet to be fetched"
+    exit 0
+fi
+
 if [ -d artifacts ]; then
     rm -r artifacts/
 fi
