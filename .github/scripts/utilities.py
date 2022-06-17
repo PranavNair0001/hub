@@ -24,7 +24,7 @@ def get_missing_files():
             specData = json.load(specFile)
             jarFiles = []
             configFiles = []
-            for object in specFile['actions']:
+            for object in specData['actions']:
               if(object['type'] == 'one_step_deploy_plugin'):
                 for property in object['arguments']:
                   if(property['name'] == 'jar'):
