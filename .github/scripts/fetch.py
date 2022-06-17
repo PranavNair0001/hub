@@ -14,8 +14,7 @@ for id in ids:
 
 jsonStr = ''
 for i in range(len(toFetch)):
-  filename = utilities.run_shell_command('basename -- ' + toFetch[i])
-  extension = utilities.run_shell_command('filename=' + filename + ' && ${filename##*.}')
+  extension = toFetch[i].split('.')[-1]
   jsonStr += '{"path":"' + toFetch[i] + '","target_path":"artifact/' + toFetch[i].split('/')[3] + '","artifact":"' + toFetch[i].split('/')[3] + '","repo":{"id":"' + ids[i] + '","file_type":"' + extension + '"}},'
 
 output = '[' + jsonStr[:-1] + ']'

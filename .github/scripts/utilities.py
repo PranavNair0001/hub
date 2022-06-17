@@ -31,22 +31,28 @@ def get_missing_files():
                     jarFiles.append(property['value'])
                   if(property['name'] == 'config'):
                     configFiles.append(property['value'])
-            if((len(jarFiles) != 0) or (len(configFiles) != 0)):
-              if(os.path.isfile(os.path.join(artifactDir, 'build.yaml'))):
-                buildFile = open(os.path.join(artifactDir, 'build.yaml'))
-                buildData = yaml.load(buildFile, Loader=yaml.FullLoader)
-                groupId = buildData['maven-central']['groupId']
-                artifactId = buildData['maven-central']['artifactId']
-                for jarFile in jarFiles:
-                  if(not os.path.isfile(os.path.join(artifactVersionDir, jarFile))):
-                    files.append(os.path.join(artifactVersionDir, jarFile))
-                    ids.append('%s:%s:%s' %(groupId, artifactId, version))
-                for configFile in configFiles:
-                  if(not os.path.isfile(os.path.join(artifactVersionDir, configFile))):
-                    files.append(os.path.join(artifactVersionDir, configFile))
-                    ids.append('%s:%s:%s' %(groupId, artifactId, version))
-              else:
-                print('Error: build.yaml file does not exist for ' + artifactDir)
+            for jarFile in jarFiles:
+              if(not os.path.isfile(os.path.join(artifactVersionDir, jarFile))):
+                if(os.path.isfile(os.path.join(artifactDir, 'build.yaml'))):
+                  buildFile = open(os.path.join(artifactDir, 'build.yaml'))
+                  buildData = yaml.load(buildFile, Loader=yaml.FullLoader)
+                  groupId = buildData['maven-central']['groupId']
+                  artifactId = buildData['maven-central']['artifactId']
+                  files.append(os.path.join(artifactVersionDir, jarFile))
+                  ids.append('%s:%s:%s' %(groupId, artifactId, version))
+                else:
+                  print('Error: build.yaml file does not exist for ' + artifactDir)
+            for configFile in configFiles:
+              if(not os.path.isfile(os.path.join(artifactVersionDir, configFile))):
+                if(os.path.isfile(os.path.join(artifactDir, 'build.yaml'))):
+                  buildFile = open(os.path.join(artifactDir, 'build.yaml'))
+                  buildData = yaml.load(buildFile, Loader=yaml.FullLoader)
+                  groupId = buildData['maven-central']['groupId']
+                  artifactId = buildData['maven-central']['artifactId']
+                  files.append(os.path.join(artifactVersionDir, configFile))
+                  ids.append('%s:%s:%s' %(groupId, artifactId, version))
+                else:
+                  print('Error: build.yaml file does not exist for ' + artifactDir)
           else:
             print('Error: spec.json does not exist for ' + artifactVersionDir)
             exit(1)
