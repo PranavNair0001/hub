@@ -12,24 +12,27 @@ jobs:
     - name: Repository Checkout    # Action to access file structure of repository in runner
       uses: actions/checkout@v2.3.4
 
-    - name: Version Checks    # Step to check versions of Maven and Java
-      run: |
-        mvn -version
-        java -version
-        javac -version
+    - name: Run Script    # Step to execute build.py script that performs operations of this job
+      run: python3 ./.github/scripts/build.py
 
-    - name: Packager Build    # Step to build the packager with Maven
-      run: |
-        cd packager/
-        mvn clean package
-        cd ../
-
-    - name: packages Builds    # Step to build packages.json at root level using Packager
-      run: |
-        java -cp "packager/target/lib/*:packager/target/*" io.cdap.hub.Tool build
-
-    - name: Files List    # Step to list all files, and confirm successful build
-      run: ls
+#    - name: Version Checks    # Step to check versions of Maven and Java
+#      run: |
+#        mvn -version
+#        java -version
+#        javac -version
+#
+#    - name: Packager Build    # Step to build the packager with Maven
+#      run: |
+#        cd packager/
+#        mvn clean package
+#        cd ../
+#
+#    - name: packages Builds    # Step to build packages.json at root level using Packager
+#      run: |
+#        java -cp "packager/target/lib/*:packager/target/*" io.cdap.hub.Tool build
+#
+#    - name: Files List    # Step to list all files, and confirm successful build
+#      run: ls
 
     - name: Store packages.json as Artifact
       uses: actions/upload-artifact@v3
