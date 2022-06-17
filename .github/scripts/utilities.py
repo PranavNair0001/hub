@@ -31,7 +31,7 @@ def get_missing_files():
                     jarFiles.append(property['value'])
                   if(property['name'] == 'config'):
                     configFiles.append(property['value'])
-            if((len(jarFiles) != 0) or (len(configFiles != 0))):
+            if((len(jarFiles) != 0) or (len(configFiles) != 0)):
               if(os.path.isfile(artifactDir, 'build.yaml')):
                 buildFile = open(os.path.join(artifactDir, 'build.yaml'))
                 buildData = yaml.load(buildFile, Loader=yaml.FullLoader)
