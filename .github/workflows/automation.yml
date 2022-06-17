@@ -54,14 +54,8 @@ jobs:
     - name: Repository Checkout    # Action to access file structure of repository in runner
       uses: actions/checkout@v2.3.4
 
-    - name: GCS Bucket Sync    # Step to sync local file structure with contents of GCS Buckets
-      run: gsutil -m rsync -i -r gs://project-step-pranav-hub-cdap-io/packages/ ./packages/
-
-    - name: Setting Permissions    # Step to enable execute permission for fetch.sh script
-      run: chmod +x ./.github/scripts/fetch.sh
-
-    - name: Listing Missing Files    # Step to execute fetch.sh script to get list of all missing files
-      run: ./.github/scripts/fetch.sh
+    - name: Run Script    # Step to execute fetch.py script that performs operations of this job
+      run: python3 ./.github/scripts/fetch.py
 
     - name: Setting Output    # Step to set resultant list as output of job
       id: set-matrix
