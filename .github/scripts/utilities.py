@@ -32,7 +32,7 @@ def get_missing_files():
                   if(property['name'] == 'config'):
                     configFiles.append(property['value'])
             if((len(jarFiles) != 0) or (len(configFiles) != 0)):
-              if(os.path.isfile(artifactDir, 'build.yaml')):
+              if(os.path.isfile(os.path.join(artifactDir, 'build.yaml'))):
                 buildFile = open(os.path.join(artifactDir, 'build.yaml'))
                 buildData = yaml.load(buildFile, Loader=yaml.FullLoader)
                 groupId = buildData['maven-central']['groupId']
