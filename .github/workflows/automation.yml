@@ -31,17 +31,11 @@ jobs:
     - name: Files List    # Step to list all files, and confirm successful build
       run: ls
 
-    - name: Store packages.json as Artifact
+    - name: Store packages.json as Artifact    # Action to save packages.json as an artifact
       uses: actions/upload-artifact@v3
       with:
         name: packages.json
         path: ./packages.json
-
-  #      - name: Copy to GCS Buckets    # Step to send all artifacts, packages.json and categories.json to GCS buckets
-  #        run: |
-  #          gsutil -m cp -r -n packages/ gs://project-step-pranav-hub-cdap-io/
-  #          gsutil cp categories.json gs://project-step-pranav-hub-cdap-io/categories.json
-  #          gsutil cp packages.json gs://project-step-pranav-hub-cdap-io/packages.json
 
   list-files:
     needs: setup-and-build
