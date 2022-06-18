@@ -2,6 +2,17 @@ import os
 import subprocess
 import json
 import yaml
+import re
+
+class LazyDecoder(json.JSONDecoder):
+  def decode(self, s, **kwargs):
+    regex_replacements = [
+        (re.compile(r'([^\\])\\([^\\])'), r'\1\\\\\2'),
+        (re.compile(r',(\s*])'), r'\1'),
+    ]
+    for regex, replacement in regex_replacements:
+      s = regex.sub(replacement, s)
+    return super().decode(s, **kwargs)
 
 def run_shell_command(cmd):
   process = subprocess.run(cmd, stderr=subprocess.PIPE, shell=True)
@@ -21,7 +32,7 @@ def get_missing_files():
         if(os.path.isdir(artifactVersionDir)):
           if(os.path.isfile(os.path.join(artifactVersionDir, 'spec.json'))):
             specFile = open(os.path.join(artifactVersionDir, 'spec.json'))
-            specData = json.load(specFile)
+            specData = json.load(specFile, cls=LazyDecoder)
             jarFiles = []
             configFiles = []
             for object in specData['actions']:
