@@ -12,14 +12,36 @@ jobs:
     - name: Repository Checkout    # Action to access file structure of repository in runner
       uses: actions/checkout@v2.3.4
 
-    - name: Run Script    # Step to execute build.py script that performs operations of this job
-      run: python3 ./.github/scripts/build.py
+    - name: Version Checks    # Step to check versions of Maven and Java
+      run: |
+        mvn -version
+        java -version
+        javac -version
+
+    - name: Packager Build    # Step to build the packager with Maven
+      run: |
+        cd packager/
+        mvn clean package
+        cd ../
+
+    - name: packages Builds    # Step to build packages.json at root level using Packager
+      run: |
+        java -cp "packager/target/lib/*:packager/target/*" io.cdap.hub.Tool build
+
+    - name: Files List    # Step to list all files, and confirm successful build
+      run: ls
 
     - name: Store packages.json as Artifact
       uses: actions/upload-artifact@v3
       with:
         name: packages.json
         path: ./packages.json
+
+  #      - name: Copy to GCS Buckets    # Step to send all artifacts, packages.json and categories.json to GCS buckets
+  #        run: |
+  #          gsutil -m cp -r -n packages/ gs://project-step-pranav-hub-cdap-io/
+  #          gsutil cp categories.json gs://project-step-pranav-hub-cdap-io/categories.json
+  #          gsutil cp packages.json gs://project-step-pranav-hub-cdap-io/packages.json
 
   list-files:
     needs: setup-and-build
@@ -29,8 +51,14 @@ jobs:
     - name: Repository Checkout    # Action to access file structure of repository in runner
       uses: actions/checkout@v2.3.4
 
-    - name: Run Script    # Step to execute fetch.py script that performs operations of this job
-      run: python3 ./.github/scripts/fetch.py
+    - name: GCS Bucket Sync    # Step to sync local file structure with contents of GCS Buckets
+      run: gsutil -m rsync -i -r gs://project-step-pranav-hub-cdap-io/packages/ ./packages/
+
+    - name: Setting Permissions    # Step to enable execute permission for fetch.sh script
+      run: chmod +x ./.github/scripts/fetch.sh
+
+    - name: Listing Missing Files    # Step to execute fetch.sh script to get list of all missing files
+      run: ./.github/scripts/fetch.sh
 
     - name: Setting Output    # Step to set resultant list as output of job
       id: set-matrix
@@ -51,6 +79,7 @@ jobs:
 
     env:
       ID: ${{ matrix.artifact.repo.id }}
+      VERSION: ${{ matrix.artifact.repo.version }}
       EXTENSION: ${{ matrix.artifact.repo.file_type }}
 
     steps:
@@ -73,82 +102,93 @@ jobs:
     - name: Repository Checkout    # Action to access file structure of repository in runner
       uses: actions/checkout@v2.3.4
 
+    - name: GCS Bucket Sync    # Step to sync local file structure with contents of GCS Buckets
+      run: gsutil -m rsync -i -r gs://project-step-pranav-hub-cdap-io/packages/ ./packages/
+
     - name: Download Artifact    # Action to download all the fetched missing files to a temporary artifacts directory
       uses: actions/download-artifact@v3
       with:
         path: artifacts/
 
-    - name: Run Script    # Step to execute merge.py script that performs operations of this job
-      run: python3 ./.github/scripts/merge.py
+    - name: Setting Permissions    # Step to enable execute permission for merge.sh script
+      run: chmod +x ./.github/scripts/merge.sh
 
-#   main_bucket:
-#     runs-on: new-runner
-#     steps:
-#       - uses: actions/checkout@v2
-#       - name: Copy file to gcs bucket
-#         run: gsutil -m rsync -r ./testdir gs://demo-automate-hub-release-test-master/
-    
-#   matrix_regional_buckets:
-#     runs-on: new-runner  
-#     needs: main_bucket
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         loc: [ "dir1" , "dir2", "dir3", "dir4","dir5", "dir6", "dir7", "dir8", "dir9"]
-#     steps:
-#       # - name: Syncing buckets
-#       #   run: gsutil -m rsync -r gs://demo-automate-hub-release-test-master/ gs://demo-automate-hub-release-test-${{ matrix.loc }}/
-#       - name: Syncing buckets, max 3 retries
-#         uses: nick-fields/retry@v2
-#         with:
-#           timeout_seconds: 15
-#           max_attempts: 3
-#           retry_on: error
-#           on_retry_command: echo "The upload to ${{matrix.loc}} has failed"
-#           command: gsutil -m rsync -r gs://demo-automate-hub-release-test-master/ gs://demo-automate-hub-release-test-${{ matrix.loc }}/
+    - name: Merging Fetched Files    # Step to execute merge.sh script to place all the fetched missing files in appropriate directory
+      run: ./.github/scripts/merge.sh
 
-#   failure_mode:
-#     runs-on: new-runner  
-#     if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
-#     needs: matrix_regional_buckets
-#     steps:
-#       - run: echo ${{needs.matrix_regional_buckets.result}}
-#       - name: Failure, sending email
-#         uses: dawidd6/action-send-mail@v3
-#         with:
-#           server_address: smtp.gmail.com
-#           server_port: 465
-#           username: ${{secrets.MAIL_USERNAME}}
-#           password: ${{secrets.MAIL_PASSWORD}}
-#           subject: Github Action FAILED 
-#           to: gracematson@google.com
-#           from: HUB DEMO OFFICIAL 
-#           secure: true
-#           body: Build job of ${{github.repository}} was a failure on job
+    - name: GCS Bucket Sync    # Step to sync and send all local files to GCS Bucket
+      run: |
+        gsutil -m rsync -r packages/ gs://project-step-pranav-hub-cdap-io/packages/
+        gsutil rsync categories.json gs://project-step-pranav-hub-cdap-io/categories.json
+        gsutil rsync packages.json gs://project-step-pranav-hub-cdap-io/packages.json
 
-#       - name: Revert changes checkout
-#         uses: actions/checkout@v2
-#         with:
-#           fetch-depth: 2
-      
-#       - name: Declare some variables
-#         id: vars
-#         shell: bash
-#         run: |
-#           echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-#           echo "::set-output name=sha_short::$(git rev-parse --short HEAD~1)"
+      #   main_bucket:
+      #     runs-on: new-runner
+      #     steps:
+      #       - uses: actions/checkout@v2
+      #       - name: Copy file to gcs bucket
+      #         run: gsutil -m rsync -r ./testdir gs://demo-automate-hub-release-test-master/
 
-#       - name: Another step
-#         run: |
-#           echo "Branch: ${{ steps.vars.outputs.branch }}"
-#           echo "Sha: ${{ steps.vars.outputs.sha_short }}"
+      #   matrix_regional_buckets:
+      #     runs-on: new-runner
+      #     needs: main_bucket
+      #     strategy:
+      #       fail-fast: false
+      #       matrix:
+      #         loc: [ "dir1" , "dir2", "dir3", "dir4","dir5", "dir6", "dir7", "dir8", "dir9"]
+      #     steps:
+      #       # - name: Syncing buckets
+      #       #   run: gsutil -m rsync -r gs://demo-automate-hub-release-test-master/ gs://demo-automate-hub-release-test-${{ matrix.loc }}/
+      #       - name: Syncing buckets, max 3 retries
+      #         uses: nick-fields/retry@v2
+      #         with:
+      #           timeout_seconds: 15
+      #           max_attempts: 3
+      #           retry_on: error
+      #           on_retry_command: echo "The upload to ${{matrix.loc}} has failed"
+      #           command: gsutil -m rsync -r gs://demo-automate-hub-release-test-master/ gs://demo-automate-hub-release-test-${{ matrix.loc }}/
 
-#       - name: Revert changes
-#         run: |
-#           git config user.name grace-matson
-#           git config user.email gracematson@google.com
-#           git reset --merge ${{ steps.vars.outputs.sha_short }}
-#           git push -f
-      
+      #   failure_mode:
+      #     runs-on: new-runner
+      #     if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
+      #     needs: matrix_regional_buckets
+      #     steps:
+      #       - run: echo ${{needs.matrix_regional_buckets.result}}
+      #       - name: Failure, sending email
+      #         uses: dawidd6/action-send-mail@v3
+      #         with:
+      #           server_address: smtp.gmail.com
+      #           server_port: 465
+      #           username: ${{secrets.MAIL_USERNAME}}
+      #           password: ${{secrets.MAIL_PASSWORD}}
+      #           subject: Github Action FAILED
+      #           to: gracematson@google.com
+      #           from: HUB DEMO OFFICIAL
+      #           secure: true
+      #           body: Build job of ${{github.repository}} was a failure on job
+
+      #       - name: Revert changes checkout
+      #         uses: actions/checkout@v2
+      #         with:
+      #           fetch-depth: 2
+
+      #       - name: Declare some variables
+      #         id: vars
+      #         shell: bash
+      #         run: |
+      #           echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      #           echo "::set-output name=sha_short::$(git rev-parse --short HEAD~1)"
+
+      #       - name: Another step
+      #         run: |
+      #           echo "Branch: ${{ steps.vars.outputs.branch }}"
+      #           echo "Sha: ${{ steps.vars.outputs.sha_short }}"
+
+      #       - name: Revert changes
+      #         run: |
+      #           git config user.name grace-matson
+      #           git config user.email gracematson@google.com
+      #           git reset --merge ${{ steps.vars.outputs.sha_short }}
+      #           git push -f
 
 
