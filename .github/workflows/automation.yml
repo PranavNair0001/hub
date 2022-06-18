@@ -76,7 +76,6 @@ jobs:
 
     env:
       ID: ${{ matrix.artifact.repo.id }}
-      VERSION: ${{ matrix.artifact.repo.version }}
       EXTENSION: ${{ matrix.artifact.repo.file_type }}
 
     steps:
@@ -90,24 +89,28 @@ jobs:
         name: ${{ matrix.artifact.artifact }}
         path: ${{ matrix.artifact.target_path }}
 
-#  merge-files:
-#    needs: fetch-files
-#    if: always()
-#    runs-on: new-runner
-#    steps:
-#
-#    - name: Repository Checkout    # Action to access file structure of repository in runner
-#      uses: actions/checkout@v2.3.4
-#
+  merge-files:
+    needs: fetch-files
+    if: always()
+    runs-on: new-runner
+    steps:
+
+    - name: Repository Checkout    # Action to access file structure of repository in runner
+      uses: actions/checkout@v2.3.4
+
 #    - name: GCS Bucket Sync    # Step to sync local file structure with contents of GCS Buckets
 #      run: gsutil -m rsync -i -r gs://project-step-pranav-hub-cdap-io/packages/ ./packages/
-#
-#    - name: Download Artifact    # Action to download all the fetched missing files to a temporary artifacts directory
-#      uses: actions/download-artifact@v3
-#      with:
-#        path: artifacts/
-#
-#    - name: Setting Permissions    # Step to enable execute permission for merge.sh script
+
+    - name: Download Artifact    # Action to download all the fetched missing files to a temporary artifacts directory
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts/
+
+    - name: Run Script    # Step to execute merge.py script that performs operations of this job
+      run: python3 ./.github/scripts/merge.py
+
+
+        #    - name: Setting Permissions    # Step to enable execute permission for merge.sh script
 #      run: chmod +x ./.github/scripts/merge.sh
 #
 #    - name: Merging Fetched Files    # Step to execute merge.sh script to place all the fetched missing files in appropriate directory

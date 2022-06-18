@@ -74,3 +74,9 @@ def gcs_sync_dir(source, destination, ignore=False):
     run_shell_command('gsutil -m rsync -i -r %s %s' %(source, destination))
   else:
     run_shell_command('gsutil -m rsync -r %s %s' %(source, destination))
+
+def gcs_sync(source, destination, ignore=False):
+  if ignore:
+    run_shell_command('gsutil rsync -i %s %s' %(source, destination))
+  else:
+    run_shell_command('gsutil rsync  %s %s' %(source, destination))
