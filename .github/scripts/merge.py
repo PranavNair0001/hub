@@ -29,5 +29,5 @@ if(os.path.isdir('artifacts')):
   shutil.rmtree('artifacts')
 
 utilities.gcs_sync_dir('packages', 'gs://project-step-pranav-hub-cdap-io/packages/')
-utilities.gcs_sync('packages.json', 'gs://project-step-pranav-hub-cdap-io/packages.json')
-utilities.gcs_sync('categories.json', 'gs://project-step-pranav-hub-cdap-io/categores.json')
+utilities.gcs_copy('packages.json', 'gs://project-step-pranav-hub-cdap-io/packages.json', overwrite=True)
+utilities.gcs_copy('categories.json', 'gs://project-step-pranav-hub-cdap-io/categores.json', overwrite=True)

@@ -75,8 +75,8 @@ def gcs_sync_dir(source, destination, ignore=False):
   else:
     run_shell_command('gsutil -m rsync -r %s %s' %(source, destination))
 
-def gcs_sync(source, destination, ignore=False):
-  if ignore:
-    run_shell_command('gsutil rsync -i %s %s' %(source, destination))
+def gcs_copy(source, destination, overwrite=False):
+  if overwrite:
+    run_shell_command('gsutil cp %s %s' %(source, destination))
   else:
-    run_shell_command('gsutil rsync  %s %s' %(source, destination))
+    run_shell_command('gsutil cp -n %s %s' %(source, destination))
