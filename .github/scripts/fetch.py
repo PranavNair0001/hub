@@ -21,4 +21,7 @@ output = '[' + jsonStr[:-1] + ']'
 print('Output of fetch.py: ')
 print(output)
 
-utilities.run_shell_command('output=' + output + ' && export output && echo "output=${output}" >> $GITHUB_ENV')
+env_file = os.getenv('GITHUB_ENV')
+
+with open(env_file, "a") as myfile:
+  myfile.write("output=" + str(output))
