@@ -81,6 +81,9 @@ jobs:
 
     steps:
 
+    - name: Repository Checkout    # Action to access file structure of repository in runner
+      uses: actions/checkout@v2.3.4
+
     - name: Sync with GCS
       run: gsutil rsync gs://project-step-pranav-hub-cdap-io/$DIR $DIR
 
