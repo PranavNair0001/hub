@@ -102,8 +102,8 @@ jobs:
     - name: Repository Checkout    # Action to access file structure of repository in runner
       uses: actions/checkout@v2.3.4
 
-    - name: GCS Bucket Sync    # Step to sync local file structure with contents of GCS Buckets
-      run: gsutil -m rsync -i -r gs://project-step-pranav-hub-cdap-io/packages/ ./packages/
+#    - name: GCS Bucket Sync    # Step to sync local file structure with contents of GCS Buckets
+#      run: gsutil -m rsync -i -r gs://project-step-pranav-hub-cdap-io/packages/ ./packages/
 
     - name: Download Artifact    # Action to download all the fetched missing files to a temporary artifacts directory
       uses: actions/download-artifact@v3
