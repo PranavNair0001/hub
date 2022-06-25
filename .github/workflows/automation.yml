@@ -82,7 +82,7 @@ jobs:
     steps:
 
     - name: Sync with GCS
-      run: gsutil rsync gs://$DIR $DIR
+      run: gsutil rsync gs://project-step-pranav-hub-cdap-io/$DIR $DIR
 
     - name: Fetch Missing File    # Step to fetch missing file from Maven Central Repository
       run: '(test -f $FILEPATH && cp $FILEPATH artifact/$FILENAME) || mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/'
