@@ -53,7 +53,7 @@ i=0;
 while [ $i -lt ${#toFetch[@]} ]; do
     filename=$(basename -- "${toFetch[$i]}")
     extension="${filename##*.}"
-    json="$json{\"path\":\"${toFetch[$i]}\",\"target_path\":\"artifact/`echo "${toFetch[$i]}" | cut -d "/" -f 4`\",\"artifact\":\"`echo "${toFetch[$i]}" | cut -d "/" -f 4`\",\"repo\":{\"id\":\"${ids[$i]}\",\"version\":\"`echo "${toFetch[$i]}" | cut -d "/" -f 3`\",\"file_type\":\"${extension}\"}},";
+    json="$json{\"path\":\"${toFetch[$i]}\",\"target_path\":\"artifact/`echo "${toFetch[$i]}" | cut -d "/" -f 4`\",\"artifact\":\"`echo "${toFetch[$i]}" | cut -d "/" -f 4`\",\"artifactDir\":\"`echo "${toFetch[$i]}" | cut -d "/" -f 1-3`\",\"repo\":{\"id\":\"${ids[$i]}\",\"version\":\"`echo "${toFetch[$i]}" | cut -d "/" -f 3`\",\"file_type\":\"${extension}\"}},";
     i=`expr $i + 1`;
 done
 

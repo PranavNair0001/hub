@@ -45,8 +45,8 @@ jobs:
     - name: Repository Checkout    # Action to access file structure of repository in runner
       uses: actions/checkout@v2.3.4
 
-    - name: GCS Bucket Sync    # Step to sync local file structure with contents of GCS Buckets
-      run: gsutil -m rsync -i -r gs://project-step-pranav-hub-cdap-io/packages/ ./packages/
+#    - name: GCS Bucket Sync    # Step to sync local file structure with contents of GCS Buckets
+#      run: gsutil -m rsync -i -r gs://project-step-pranav-hub-cdap-io/packages/ ./packages/
 
     - name: Setting Permissions    # Step to enable execute permission for fetch.sh script
       run: chmod +x ./.github/scripts/fetch.sh
@@ -75,11 +75,17 @@ jobs:
       ID: ${{ matrix.artifact.repo.id }}
       VERSION: ${{ matrix.artifact.repo.version }}
       EXTENSION: ${{ matrix.artifact.repo.file_type }}
+      DIR: ${{ matrix.artifact.artifactDir }}
+      FILEPATH: ${{ matrix.artifact.path }}
+      FILENAME: ${{ matrix.artifact.artifact }}
 
     steps:
 
+    - name: Sync with GCS
+      run: gsutil rsync gs://$DIR $DIR
+
     - name: Fetch Missing File    # Step to fetch missing file from Maven Central Repository
-      run: mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/
+      run: '(test -f $FILEPATH && cp $FILEPATH artifact/$FILENAME) || mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/'
 
     - name: Upload File    # Action to upload the fetched missing file as an artifact
       uses: actions/upload-artifact@v3
@@ -112,7 +118,7 @@ jobs:
 
     - name: GCS Bucket Sync    # Step to sync and send all local files to GCS Bucket
       run: |
-        gsutil -m rsync -r packages/ gs://project-step-pranav-hub-cdap-io/packages/
+        gsutil -m rsync -d -r packages/ gs://project-step-pranav-hub-cdap-io/packages/
         gsutil cp categories.json gs://project-step-pranav-hub-cdap-io/categories.json
         gsutil cp packages.json gs://project-step-pranav-hub-cdap-io/packages.json
         gsutil -m rsync -r ./packages/ gs://demo-automate-hub-release-test-master/packages/
