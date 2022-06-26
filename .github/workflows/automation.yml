@@ -48,11 +48,11 @@ jobs:
 #    - name: GCS Bucket Sync    # Step to sync local file structure with contents of GCS Buckets
 #      run: gsutil -m rsync -i -r gs://project-step-pranav-hub-cdap-io/packages/ ./packages/
 
-    - name: Setting Permissions    # Step to enable execute permission for fetch.sh script
-      run: chmod +x ./.github/scripts/fetch.sh
+    - name: Setting Permissions    # Step to enable execute permission for list.sh script
+      run: chmod +x ./.github/scripts/list.sh
 
-    - name: Listing Missing Files    # Step to execute fetch.sh script to get list of all missing files
-      run: ./.github/scripts/fetch.sh
+    - name: Listing Missing Files    # Step to execute list.sh script to get list of all missing files
+      run: ./.github/scripts/list.sh
 
     - name: Setting Output    # Step to set resultant list as output of job
       id: set-matrix
@@ -87,8 +87,11 @@ jobs:
     - name: Sync with GCS
       run: gsutil rsync gs://project-step-pranav-hub-cdap-io/$DIR $DIR
 
-    - name: Fetch Missing File    # Step to fetch missing file from Maven Central Repository
-      run: '(test -f $FILEPATH && cp $FILEPATH artifact/$FILENAME) || mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/'
+    - name: Setting Permissions    # Step to enable permissions for fetch.sh script
+      run: chmod +rwx ./.github/scripts/fetch.sh
+
+    - name: Fetching Missing Files    # Step to execute fetch.sh script to fetch the missing files
+      run: ./.github/scripts/fetch.sh
 
     - name: Upload File    # Action to upload the fetched missing file as an artifact
       uses: actions/upload-artifact@v3
