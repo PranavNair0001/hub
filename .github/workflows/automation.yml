@@ -95,9 +95,8 @@ jobs:
     - name: Fetching Missing Files    # Step to find and fetch the missing file
       run: |
         echo "Fetching: ${FILEPATH}"
-        if [ -f "${FILEPATH}" ]; then
+        if [ -f "artifact/${FILENAME}" ]; then
           echo "${FILENAME} : Found in GCS Bucket"
-          cp ${FILEPATH} artifact/
         else
           echo "${FILENAME} : Not found in GCS Bucket, Fetching from Maven Central"
           mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/
