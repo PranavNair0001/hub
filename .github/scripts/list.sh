@@ -10,8 +10,8 @@ for artifact in packages/* ; do
               echo "${artifactVersion}/spec.json does not exist";
               exit 0;
           else
-              jarFiles=($(jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "jar").value' ${artifactVersion}/spec.json));
-              configFiles=($(jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "config").value' ${artifactVersion}/spec.json));
+              jarFiles=($(jq -r '.actions[].arguments[] | select(.name == "jar").value' ${artifactVersion}/spec.json));
+              configFiles=($(jq -r '.actions[].arguments[] | select(.name == "config").value' ${artifactVersion}/spec.json));
               for jarFile in $jarFiles ; do
                   if [ ! -f "${artifactVersion}/${jarFile}" ]; then
                     if [ -f "${artifact}/build.yaml" ]; then
