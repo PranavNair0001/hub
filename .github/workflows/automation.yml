@@ -38,6 +38,7 @@ jobs:
 
   list-files:
     needs: setup-and-build
+    if: success()
     runs-on: new-runner
     steps:
 
@@ -62,7 +63,7 @@ jobs:
 
   fetch-files:
     needs: list-files
-    if: ${{ needs.list-files.outputs.matrix != '[]' && needs.list-files.outputs.matrix != '' }}
+    if: ${{ needs.list-files.outputs.matrix != '[]' && needs.list-files.outputs.matrix != '' && success()}}
     runs-on: new-runner
 
     strategy:
@@ -111,7 +112,7 @@ jobs:
 
   merge-files:
     needs: fetch-files
-    if: always()
+    if: success()
     runs-on: new-runner
     steps:
 
@@ -142,6 +143,7 @@ jobs:
   sync-regional-buckets:
    runs-on: new-runner
    needs: merge-files
+   if: success()
    strategy:
      fail-fast: false
      matrix:

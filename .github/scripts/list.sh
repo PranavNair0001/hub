@@ -19,6 +19,8 @@ for artifact in packages/* ; do
                         ids[${#ids[@]}]="`yq eval '.maven-central.groupId' ${artifact}/build.yaml`:`yq eval '.maven-central.artifactId' ${artifact}/build.yaml`"
                     else
                         echo "${artifact}/build.yaml does not exist";
+                        toFetch[${#toFetch[@]}]=${artifactVersion}/${jarFile}
+                        ids[${#ids[@]}]=":"
                         exit 0;
                     fi
                   fi
@@ -30,6 +32,8 @@ for artifact in packages/* ; do
                           ids[${#ids[@]}]="`yq eval '.maven-central.groupId' ${artifact}/build.yaml`:`yq eval '.maven-central.artifactId' ${artifact}/build.yaml`"
                       else
                           echo "${artifact}/build.yaml does not exist";
+                          toFetch[${#toFetch[@]}]=${artifactVersion}/${configFile}
+                          ids[${#ids[@]}]=":"
                           exit 0;
                       fi
                   fi
