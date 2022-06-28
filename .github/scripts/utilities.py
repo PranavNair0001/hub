@@ -36,12 +36,11 @@ def get_missing_files():
             jarFiles = []
             configFiles = []
             for object in specData['actions']:
-              if(object['type'] == 'one_step_deploy_plugin'):
-                for property in object['arguments']:
-                  if(property['name'] == 'jar'):
-                    jarFiles.append(property['value'])
-                  if(property['name'] == 'config'):
-                    configFiles.append(property['value'])
+              for property in object['arguments']:
+                if(property['name'] == 'jar'):
+                  jarFiles.append(property['value'])
+                if(property['name'] == 'config'):
+                  configFiles.append(property['value'])
             for jarFile in jarFiles:
               if(not os.path.isfile(os.path.join(artifactVersionDir, jarFile))):
                 if(os.path.isfile(os.path.join(artifactDir, 'build.yaml'))):
@@ -52,7 +51,9 @@ def get_missing_files():
                   files.append(os.path.join(artifactVersionDir, jarFile))
                   ids.append('%s:%s:%s' %(groupId, artifactId, version))
                 else:
-                  print('Error: build.yaml file does not exist for ' + artifactDir)
+                  print('WARNING: build.yaml file does not exist for ' + artifactDir)
+                  files.append(os.path.join(artifactVersionDir, jarFile))
+                  ids.append('::%s' %(version))
             for configFile in configFiles:
               if(not os.path.isfile(os.path.join(artifactVersionDir, configFile))):
                 if(os.path.isfile(os.path.join(artifactDir, 'build.yaml'))):
@@ -63,9 +64,11 @@ def get_missing_files():
                   files.append(os.path.join(artifactVersionDir, configFile))
                   ids.append('%s:%s:%s' %(groupId, artifactId, version))
                 else:
-                  print('Error: build.yaml file does not exist for ' + artifactDir)
+                  print('WARNING: build.yaml file does not exist for ' + artifactDir)
+                  files.append(os.path.join(artifactVersionDir, jarFile))
+                  ids.append('::%s' %(version))
           else:
-            print('Error: spec.json does not exist for ' + artifactVersionDir)
+            print('ERROR: spec.json does not exist for ' + artifactVersionDir)
             exit(1)
   return files, ids
 

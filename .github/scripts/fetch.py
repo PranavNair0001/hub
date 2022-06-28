@@ -1,27 +1,12 @@
-import os
 import utilities
+import os
 
-utilities.gcs_sync_dir('gs://project-step-pranav-hub-cdap-io/packages/', './packages/', ignore=True)
+os.mkdir('./artifact')
 
-toFetch, ids = utilities.get_missing_files()
+utilities.gcs_sync_dir(source='gs://project-step-pranav-hub-cdap-io/' + os.getenv('DIR'), destination='./artifact')
 
-print('Missing files before retrieval are: ')
-for file in toFetch:
-  print(file)
-
-for id in ids:
-  print(id)
-
-jsonStr = ''
-for i in range(len(toFetch)):
-  extension = toFetch[i].split('.')[-1]
-  jsonStr += '{\"path\":\"' + toFetch[i] + '\",\"target_path\":\"artifact/' + toFetch[i].split('/')[3] + '\",\"artifact\":\"' + toFetch[i].split('/')[3] + '\",\"repo\":{\"id\":\"' + ids[i] + '\",\"file_type\":\"' + extension + '\"}},'
-
-output = '[' + jsonStr[:-1] + ']'
-print('Output of fetch.py: ')
-print(output)
-
-env_file = os.getenv('GITHUB_ENV')
-
-with open(env_file, "a") as myfile:
-  myfile.write("output=" + str(output))
+if (os.path.isfile(os.path.join('./artifact', os.getenv('FILENAME')))):
+  print(os.getenv('FILENAME') + ' : Found in GCS Bucket')
+else:
+  print(os.getenv('FILENAME') + ' : Not found in GCS Bucket')
+  utilities.run_shell_command('mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/')

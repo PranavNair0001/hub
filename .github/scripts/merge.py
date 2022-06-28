@@ -31,3 +31,4 @@ if(os.path.isdir('artifacts')):
 utilities.gcs_sync_dir('packages', 'gs://project-step-pranav-hub-cdap-io/packages/')
 utilities.gcs_copy('packages.json', 'gs://project-step-pranav-hub-cdap-io/packages.json', overwrite=True)
 utilities.gcs_copy('categories.json', 'gs://project-step-pranav-hub-cdap-io/categores.json', overwrite=True)
+utilities.gcs_sync_dir('gs://project-step-pranav-hub-cdap-io/', 'gs://project-step-pranav-hub-cdap-io-master/')
