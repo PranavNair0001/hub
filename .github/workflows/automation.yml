@@ -68,26 +68,42 @@ jobs:
 #    - name: Fetch Missing File    # Step to fetch missing file from Maven Central Repository
 #      run: mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/
 
-    - name: Fetch Missing File
-      uses: jannekem/run-python-script-action@v1
-      with:
-        script: |
-          import os
-          import subprocess
-          
-          def run_shell_command(cmd):
-          process = subprocess.run(cmd, stderr=subprocess.PIPE, shell=True)
-          if(process.returncode != 0):
-            print('Process completed with error')
-          assert process.returncode == 0
+#    - name: Fetch Missing File
+#      uses: jannekem/run-python-script-action@v1
+#      with:
+#        script: |
+#          import os
+#          import subprocess
+#
+#          def run_shell_command(cmd):
+#          process = subprocess.run(cmd, stderr=subprocess.PIPE, shell=True)
+#          if(process.returncode != 0):
+#            print('Process completed with error')
+#          assert process.returncode == 0
+#
+#          os.mkdir('./artifact')
+#          run_shell_command('gsutil rsync gs://project-step-pranav-hub-cdap-io/$DIR artifact/')
+#          if (os.path.isfile(os.path.join('./artifact', os.getenv('FILENAME')))):
+#            print(os.getenv('FILENAME') + ' : Found in GCS Bucket')
+#          else:
+#            print(os.getenv('FILENAME') + ' : Not found in GCS Bucket')
+#          run_shell_command('mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/')
 
-          os.mkdir('./artifact')          
-          run_shell_command('gsutil rsync gs://project-step-pranav-hub-cdap-io/$DIR artifact/')
-          if (os.path.isfile(os.path.join('./artifact', os.getenv('FILENAME')))):
-            print(os.getenv('FILENAME') + ' : Found in GCS Bucket')
-          else:
-            print(os.getenv('FILENAME') + ' : Not found in GCS Bucket')
-          run_shell_command('mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/')
+    - name: Creating Working Directory
+      run: mkdir artifact
+
+    - name: Sync with GCS
+      run: gsutil rsync gs://project-step-pranav-hub-cdap-io/$DIR artifact/
+
+    - name: Fetching Missing Files    # Step to find and fetch the missing file
+      run: |
+        echo "Fetching: ${FILEPATH}"
+        if [ -f "artifact/${FILENAME}" ]; then
+          echo "${FILENAME} : Found in GCS Bucket"
+        else
+          echo "${FILENAME} : Not found in GCS Bucket, Fetching from Maven Central"
+          mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/
+        fi
 
     - name: Upload File    # Action to upload the fetched missing file as an artifact
       uses: actions/upload-artifact@v3
