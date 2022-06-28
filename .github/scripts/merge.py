@@ -2,8 +2,6 @@ import os
 import utilities
 import shutil
 
-utilities.gcs_sync_dir('gs://project-step-pranav-hub-cdap-io/packages/', './packages/', ignore=True)
-
 toFetch, ids = utilities.get_missing_files()
 
 for file in toFetch:
