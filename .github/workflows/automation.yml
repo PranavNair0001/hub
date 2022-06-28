@@ -65,8 +65,8 @@ jobs:
     - name: Run Script    # Step to execute fetch.py script that performs operations of this job
       run: python3 ./.github/scripts/fetch.py
 
-    - name: Fetch Missing File    # Step to fetch missing file from Maven Central Repository
-      run: mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/
+#    - name: Fetch Missing File    # Step to fetch missing file from Maven Central Repository
+#      run: mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/
 
     - name: Upload File    # Action to upload the fetched missing file as an artifact
       uses: actions/upload-artifact@v3
