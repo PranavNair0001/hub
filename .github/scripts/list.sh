@@ -8,7 +8,7 @@ for artifact in packages/* ; do
       if [ -d "${artifactVersion}" ]; then
           if [ ! -f "${artifactVersion}/spec.json" ]; then
               echo "${artifactVersion}/spec.json does not exist";
-              exit 0;
+              exit 1;
           else
               jarFiles=($(jq -r '.actions[].arguments[] | select(.name == "jar").value' ${artifactVersion}/spec.json));
               configFiles=($(jq -r '.actions[].arguments[] | select(.name == "config").value' ${artifactVersion}/spec.json));
@@ -18,10 +18,9 @@ for artifact in packages/* ; do
                         toFetch[${#toFetch[@]}]=${artifactVersion}/${jarFile}
                         ids[${#ids[@]}]="`yq eval '.maven-central.groupId' ${artifact}/build.yaml`:`yq eval '.maven-central.artifactId' ${artifact}/build.yaml`"
                     else
-                        echo "${artifact}/build.yaml does not exist";
+                        echo "WARNING: ${artifact}/build.yaml does not exist";
                         toFetch[${#toFetch[@]}]=${artifactVersion}/${jarFile}
                         ids[${#ids[@]}]=":"
-                        exit 0;
                     fi
                   fi
               done
@@ -31,10 +30,9 @@ for artifact in packages/* ; do
                           toFetch[${#toFetch[@]}]=${artifactVersion}/${configFile}
                           ids[${#ids[@]}]="`yq eval '.maven-central.groupId' ${artifact}/build.yaml`:`yq eval '.maven-central.artifactId' ${artifact}/build.yaml`"
                       else
-                          echo "${artifact}/build.yaml does not exist";
+                          echo "WARNING: ${artifact}/build.yaml does not exist";
                           toFetch[${#toFetch[@]}]=${artifactVersion}/${configFile}
                           ids[${#ids[@]}]=":"
-                          exit 0;
                       fi
                   fi
               done

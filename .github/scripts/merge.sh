@@ -14,22 +14,12 @@ for artifact in packages/* ; do
               configFiles=($(jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "config").value' ${artifactVersion}/spec.json));
               for jarFile in $jarFiles ; do
                   if [ ! -f "${artifactVersion}/${jarFile}" ]; then
-                    if [ -f "${artifact}/build.yaml" ]; then
-                        toFetch[${#toFetch[@]}]=${artifactVersion}/${jarFile}
-                    else
-                        echo "${artifact}/build.yaml does not exist";
-                        exit 0;
-                    fi
+                    toFetch[${#toFetch[@]}]=${artifactVersion}/${jarFile}
                   fi
               done
               for configFile in $configFiles ; do
                   if [ ! -f "${artifactVersion}/${configFile}" ]; then
-                      if [ -f "${artifact}/build.yaml" ]; then
-                          toFetch[${#toFetch[@]}]=${artifactVersion}/${configFile}
-                      else
-                          echo "${artifact}/build.yaml does not exist";
-                          exit 0;
-                      fi
+                      toFetch[${#toFetch[@]}]=${artifactVersion}/${configFile}
                   fi
               done
           fi
@@ -43,7 +33,13 @@ for file in ${toFetch[@]} ; do
     if [ -f "artifacts/${fileName}/${fileName}" ]; then
         mv artifacts/${fileName}/${fileName} $file
     else
-        echo "$file : not retrieved"
+        extension="${filename##*.}"
+        if [ "${extension}" == "json" ]; then
+          echo "WARNING : ${fileName} not retrieved"
+        else
+          echo "ERROR : ${fileName} not retrieved"
+          exit 1
+        fi
     fi
 done
 
@@ -60,22 +56,12 @@ for artifact in packages/* ; do
               configFiles=($(jq -r '.actions[] | select(.type == "one_step_deploy_plugin").arguments[] | select(.name == "config").value' ${artifactVersion}/spec.json));
               for jarFile in $jarFiles ; do
                   if [ ! -f "${artifactVersion}/${jarFile}" ]; then
-                    if [ -f "${artifact}/build.yaml" ]; then
-                        missing[${#missing[@]}]=${artifactVersion}/${jarFile}
-                    else
-                        echo "${artifact}/build.yaml does not exist";
-                        exit 0;
-                    fi
+                    missing[${#missing[@]}]=${artifactVersion}/${jarFile}
                   fi
               done
               for configFile in $configFiles ; do
                   if [ ! -f "${artifactVersion}/${configFile}" ]; then
-                      if [ -f "${artifact}/build.yaml" ]; then
-                          missing[${#missing[@]}]=${artifactVersion}/${configFile}
-                      else
-                          echo "${artifact}/build.yaml does not exist";
-                          exit 0;
-                      fi
+                      missing[${#missing[@]}]=${artifactVersion}/${configFile}
                   fi
               done
           fi
@@ -91,7 +77,6 @@ done
 
 if [ $missing != '' ]; then
     echo "Above file(s) yet to be fetched"
-    exit 0
 fi
 
 if [ -d artifacts ]; then
