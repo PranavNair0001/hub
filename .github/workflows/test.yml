@@ -1,20 +1,24 @@
 name: test-and-debug
 on: workflow_dispatch
 jobs:
-  strategy-matrx:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, ubuntu-20.04, ubuntu-18.04]
-    runs-on: ${{ matrix.os }}
-    env:
-      OS: ${{ matrix.os }}
+  list-python-files:
+#    strategy:
+#      matrix:
+#        os: [ubuntu-latest, ubuntu-20.04, ubuntu-18.04]
+    runs-on: ubuntu-latest
+#    env:
+#      OS: ${{ matrix.os }}
     steps:
-      - run: echo "${{ matrix.os }}"
-      - run: VAR=${{ matrix.os }}
-      - run: VAL=`${{ matrix.os }} | cut -d "-" -f 2`
-      - run: |
-          echo $VAR;
-          echo $VAL;
-      - run: echo $OS;
-      - run: OS_VAL=`echo $OS | cut -d "-" -f 2`
-      - run: echo $OS_VAL;
+      - name: Repository Checkout    # Action to access file structure of repository in runner
+        uses: actions/checkout@v2.3.4
+      - name: Run Script    # Step to execute merge.py script that performs operations of this job
+        run: python3 ./.github/scripts/list.py
+#      - run: echo "${{ matrix.os }}"
+#      - run: VAR=${{ matrix.os }}
+#      - run: VAL=`${{ matrix.os }} | cut -d "-" -f 2`
+#      - run: |
+#          echo $VAR;
+#          echo $VAL;
+#      - run: echo $OS;
+#      - run: OS_VAL=`echo $OS | cut -d "-" -f 2`
+#      - run: echo $OS_VAL;
