@@ -2,15 +2,17 @@ import os
 import utilities
 import logging
 import json
+import time
 
 logging.getLogger().setLevel(logging.INFO)
-utilities.gcs_sync_dir('gs://project-step-pranav-hub-cdap-io/packages/', './packages/', ignore=True)
+# utilities.gcs_sync_dir('gs://project-step-pranav-hub-cdap-io/packages/', './packages/', ignore=True)
 
 toFetch, ids = utilities.get_missing_files()
 
 logging.info('Missing files before retrieval are: ')
 for file in toFetch:
   logging.info(file)
+  time.sleep(5)
 
 for id in ids:
   logging.info(id)
