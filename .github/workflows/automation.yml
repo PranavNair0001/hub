@@ -59,36 +59,6 @@ jobs:
 
     steps:
 
-#    - name: Repository Checkout    # Action to access file structure of repository in runner
-#      uses: actions/checkout@v2.3.4
-#
-#    - name: Run Script    # Step to execute fetch.py script that performs operations of this job
-#      run: python3 ./.github/scripts/fetch.py
-
-#    - name: Fetch Missing File    # Step to fetch missing file from Maven Central Repository
-#      run: mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/
-
-#    - name: Fetch Missing File
-#      uses: jannekem/run-python-script-action@v1
-#      with:
-#        script: |
-#          import os
-#          import subprocess
-#
-#          def run_shell_command(cmd):
-#          process = subprocess.run(cmd, stderr=subprocess.PIPE, shell=True)
-#          if(process.returncode != 0):
-#            print('Process completed with error')
-#          assert process.returncode == 0
-#
-#          os.mkdir('./artifact')
-#          run_shell_command('gsutil rsync gs://project-step-pranav-hub-cdap-io/$DIR artifact/')
-#          if (os.path.isfile(os.path.join('./artifact', os.getenv('FILENAME')))):
-#            print(os.getenv('FILENAME') + ' : Found in GCS Bucket')
-#          else:
-#            print(os.getenv('FILENAME') + ' : Not found in GCS Bucket')
-#          run_shell_command('mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:copy -Dartifact=${ID}:${VERSION}:${EXTENSION} -DoutputDirectory=./artifact/')
-
     - name: Creating Working Directory
       run: mkdir artifact
 
@@ -139,9 +109,6 @@ jobs:
         loc: [ "dir1" , "dir2", "dir3", "dir4","dir5", "dir6", "dir7", "dir8", "dir9" ]
 
     steps:
-
-    #   - name: Syncing buckets
-    #     run: gsutil -m rsync -d -r gs://project-step-pranav-hub-cdap-io-master/ gs://project-step-pranav-hub-cdap-io-${{ matrix.loc }}/
 
     - name: Syncing buckets, max 3 retries
       uses: nick-fields/retry@v2
