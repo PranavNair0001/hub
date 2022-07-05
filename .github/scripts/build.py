@@ -1,24 +1,27 @@
 import os
+import logging
 import utilities
 
-print('Starting Setup and Build of Packager, packages.json  ....')
-print('Checking environment ....\n')
+logging.getLogger().setLevel(logging.INFO)    # Enable logging in GitHub Workflow
 
-print('Java version: ')
+logging.info('Starting Setup and Build of Packager, packages.json  ....')
+logging.info('Checking environment ....\n')
+
+logging.info('Java version: ')
 utilities.run_shell_command('java -version')
 
-print('Java compile version: ')
+logging.info('Java compile version: ')
 utilities.run_shell_command('javac -version')
 
-print('Maven version: ')
+logging.info('Maven version: ')
 utilities.run_shell_command('mvn -version')
 
-print('Building packager ....\n')
+logging.info('Building packager ....\n')
 os.chdir('./packager/')
 utilities.run_shell_command('mvn clean package')
 os.chdir('../')
 
-print('Building packages.json ....\n')
+logging.info('Building packages.json ....\n')
 utilities.run_shell_command('java -cp "packager/target/lib/*:packager/target/*" io.cdap.hub.Tool build')
 
-print('ls:\n', os.listdir())
+logging.info('ls:\n', os.listdir())

@@ -1,26 +1,30 @@
 import os
-import utilities
 import shutil
+import logging
+import utilities
+
+logging.getLogger().setLevel(logging.INFO)    # Enable logging in GitHub Workflow
 
 toFetch, ids = utilities.get_missing_files()
 
 for file in toFetch:
   fileName = file.split('/')[3]
+  logging.info('Merging missing file: ' + fileName)
   if(os.path.isfile(os.path.join('artifacts', fileName, fileName))):
     shutil.move(os.path.join('artifacts', fileName, fileName), file)
   else:
-    print(file + ' : not retrieved')
+    logging.info(file + ' : not retrieved')
 
 shutil.move(os.path.join('artifacts', 'packages.json', 'packages.json'), 'packages.json')
 
 toFetch, ids = utilities.get_missing_files()
 
-print('Missing files after retrieval: ')
+logging.info('Missing files after retrieval: ')
 for file in toFetch:
-  print(file)
+  logging.info(file)
 
 if(len(toFetch) != 0):
-  print('Above file(s) yet to be fetched')
+  logging.info('Above file(s) yet to be fetched')
   exit(1)
 
 if(os.path.isdir('artifacts')):

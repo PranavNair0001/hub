@@ -15,13 +15,13 @@ jobs:
     - name: Run Script    # Step to execute build.py script that performs operations of this job
       run: python3 ./.github/scripts/build.py
 
-    - name: Store packages.json as Artifact
+    - name: Store packages.json as Artifact    # Action to upload packages.json as an artifact for further use
       uses: actions/upload-artifact@v3
       with:
         name: packages.json
         path: ./packages.json
 
-  list-files:
+  list-files:    # Job to find and list all missing files that need to be fetched
     needs: setup-and-build
     if: success()
     runs-on: new-runner
@@ -38,11 +38,11 @@ jobs:
       run: echo "::set-output name=matrix::${output}"
 
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.set-matrix.outputs.matrix }}    # JSON output containing contents of strategy matrix of next job
 
-  fetch-files:
+  fetch-files:    # Job to fetch each missing file individually in parallel
     needs: list-files
-    if: ${{ needs.list-files.outputs.matrix != '[]' && needs.list-files.outputs.matrix != '' && success() }}
+    if: ${{ needs.list-files.outputs.matrix != '[]' && needs.list-files.outputs.matrix != '' && success() }}    # Skip job if no file to be fetched
     runs-on: new-runner
 
     strategy:
@@ -59,10 +59,10 @@ jobs:
 
     steps:
 
-    - name: Creating Working Directory
+    - name: Creating Working Directory    # Step to create a temporary working directory
       run: mkdir artifact
 
-    - name: Sync with GCS
+    - name: Sync with GCS    # Step to sync GCS bucket directory that is expected to contain missing file with working directory
       run: gsutil rsync gs://project-step-pranav-hub-cdap-io/$DIR artifact/
 
     - name: Fetching Missing Files    # Step to find and fetch the missing file
@@ -81,7 +81,7 @@ jobs:
         name: ${{ matrix.artifact.artifact }}
         path: ${{ matrix.artifact.target_path }}
 
-  merge-files:
+  merge-files:    # Job to place all artifacts in appropriate location, and push to GCS buckets
     needs: fetch-files
     if: success()
     runs-on: new-runner
@@ -98,7 +98,7 @@ jobs:
     - name: Run Script    # Step to execute merge.py script that performs operations of this job
       run: python3 ./.github/scripts/merge.py
 
-  sync-regional-buckets:
+  sync-regional-buckets:    # Job to sync all regional GCS buckets with central GCS bucket, in parallel
     runs-on: new-runner
     needs: merge-files
     if: success()
@@ -110,7 +110,7 @@ jobs:
 
     steps:
 
-    - name: Syncing buckets, max 3 retries
+    - name: Syncing buckets, max 3 retries    # Action to sync bucket, and retry upto 3 times if failed
       uses: nick-fields/retry@v2
       with:
         timeout_seconds: 15
@@ -119,14 +119,15 @@ jobs:
         on_retry_command: echo "The upload to ${{matrix.loc}} has failed"
         command: gsutil -m rsync -d -r gs://project-step-pranav-hub-cdap-io-master/ gs://project-step-pranav-hub-cdap-io-${{ matrix.loc }}/
 
-  failure_mode:
+  failure_mode:    # Job to mail and notify concerned persons, if workflow fails
     runs-on: new-runner
     if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
     needs: sync-regional-buckets
-
     steps:
+
     - run: echo ${{needs.matrix_regional_buckets.result}}
-    - name: Failure, sending email
+
+    - name: Failure, sending email    # Action to send mail
       uses: dawidd6/action-send-mail@v3
       with:
         server_address: smtp.gmail.com
@@ -139,51 +140,6 @@ jobs:
         secure: true
         body: Build job of ${{github.repository}} was a failure on job
 
-
-      #   main_bucket:
-#     runs-on: new-runner
-#     steps:
-#       - uses: actions/checkout@v2
-#       - name: Copy file to gcs bucket
-#         run: gsutil -m rsync -r ./testdir gs://demo-automate-hub-release-test-master/
-    
-#   matrix_regional_buckets:
-#     runs-on: new-runner  
-#     needs: main_bucket
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         loc: [ "dir1" , "dir2", "dir3", "dir4","dir5", "dir6", "dir7", "dir8", "dir9"]
-#     steps:
-#       # - name: Syncing buckets
-#       #   run: gsutil -m rsync -r gs://demo-automate-hub-release-test-master/ gs://demo-automate-hub-release-test-${{ matrix.loc }}/
-#       - name: Syncing buckets, max 3 retries
-#         uses: nick-fields/retry@v2
-#         with:
-#           timeout_seconds: 15
-#           max_attempts: 3
-#           retry_on: error
-#           on_retry_command: echo "The upload to ${{matrix.loc}} has failed"
-#           command: gsutil -m rsync -r gs://demo-automate-hub-release-test-master/ gs://demo-automate-hub-release-test-${{ matrix.loc }}/
-
-#   failure_mode:
-#     runs-on: new-runner  
-#     if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
-#     needs: matrix_regional_buckets
-#     steps:
-#       - run: echo ${{needs.matrix_regional_buckets.result}}
-#       - name: Failure, sending email
-#         uses: dawidd6/action-send-mail@v3
-#         with:
-#           server_address: smtp.gmail.com
-#           server_port: 465
-#           username: ${{secrets.MAIL_USERNAME}}
-#           password: ${{secrets.MAIL_PASSWORD}}
-#           subject: Github Action FAILED 
-#           to: gracematson@google.com
-#           from: HUB DEMO OFFICIAL 
-#           secure: true
-#           body: Build job of ${{github.repository}} was a failure on job
 
 #       - name: Revert changes checkout
 #         uses: actions/checkout@v2

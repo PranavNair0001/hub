@@ -3,6 +3,9 @@ import subprocess
 import json
 import yaml
 import re
+import logging
+
+logging.getLogger().setLevel(logging.INFO)    # Enable logging in GitHub Workflow
 
 class LazyDecoder(json.JSONDecoder):
   def decode(self, s, **kwargs):
@@ -27,10 +30,13 @@ def get_missing_files():
   for artifact in os.listdir(packagesDir):
     artifactDir = os.path.join(packagesDir, artifact)
     if(os.path.isdir(artifactDir)):
+      logging.info('Checking artifact: ' + artifact)
       for version in os.listdir(artifactDir):
         artifactVersionDir = os.path.join(artifactDir, version)
         if(os.path.isdir(artifactVersionDir)):
+          logging.info('Checking missing files in ' + artifactVersionDir)
           if(os.path.isfile(os.path.join(artifactVersionDir, 'spec.json'))):
+            logging.info('Inspecting spec.json for necessary files')
             specFile = open(os.path.join(artifactVersionDir, 'spec.json'))
             specData = json.load(specFile, cls=LazyDecoder)
             jarFiles = []
@@ -41,6 +47,9 @@ def get_missing_files():
                   jarFiles.append(property['value'])
                 if(property['name'] == 'config'):
                   configFiles.append(property['value'])
+            logging.info('Required files: ')
+            logging.info(jarFiles)
+            logging.info(configFiles)
             for jarFile in jarFiles:
               if(not os.path.isfile(os.path.join(artifactVersionDir, jarFile))):
                 if(os.path.isfile(os.path.join(artifactDir, 'build.yaml'))):
@@ -50,8 +59,9 @@ def get_missing_files():
                   artifactId = buildData['maven-central']['artifactId']
                   files.append(os.path.join(artifactVersionDir, jarFile))
                   ids.append('%s:%s:%s' %(groupId, artifactId, version))
+                  logging.info('Missing file: ' + jarFile)
                 else:
-                  print('WARNING: build.yaml file does not exist for ' + artifactDir)
+                  logging.info('WARNING: build.yaml file does not exist for ' + artifactDir)
                   files.append(os.path.join(artifactVersionDir, jarFile))
                   ids.append('::%s' %(version))
             for configFile in configFiles:
@@ -63,22 +73,25 @@ def get_missing_files():
                   artifactId = buildData['maven-central']['artifactId']
                   files.append(os.path.join(artifactVersionDir, configFile))
                   ids.append('%s:%s:%s' %(groupId, artifactId, version))
+                  logging.info('Missing file: ' + configFile)
                 else:
-                  print('WARNING: build.yaml file does not exist for ' + artifactDir)
+                  logging.info('WARNING: build.yaml file does not exist for ' + artifactDir)
                   files.append(os.path.join(artifactVersionDir, jarFile))
                   ids.append('::%s' %(version))
           else:
-            print('ERROR: spec.json does not exist for ' + artifactVersionDir)
+            logging.info('ERROR: spec.json does not exist for ' + artifactVersionDir)
             exit(1)
   return files, ids
 
 def gcs_sync_dir(source, destination, ignore=False):
+  logging.info('Syncing directory using gsutil. Source: ' + source + ' Destination: ' + destination)
   if ignore:
     run_shell_command('gsutil -m rsync -i -r %s %s' %(source, destination))
   else:
     run_shell_command('gsutil -m rsync -r %s %s' %(source, destination))
 
 def gcs_copy(source, destination, overwrite=False):
+  logging.info('Copying file using gsutil. Source: ' + source + ' Destination: ' + destination)
   if overwrite:
     run_shell_command('gsutil cp %s %s' %(source, destination))
   else:
