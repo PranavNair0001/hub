@@ -33,7 +33,7 @@ jobs:
 
   fetch-files:    # Job to fetch each missing file individually in parallel
     needs: setup-build-and-list-files
-    if: ${{ needs.list-files.outputs.matrix != '[]' && needs.list-files.outputs.matrix != '' && success() }}    # Skip job if no file to be fetched
+    if: ${{ needs.setup-build-and-list-files.outputs.matrix != '[]' && needs.setup-build-and-list-files.outputs.matrix != '' && success() }}    # Skip job if no file to be fetched
     runs-on: new-runner
 
     strategy:
