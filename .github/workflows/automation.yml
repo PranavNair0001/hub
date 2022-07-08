@@ -132,7 +132,7 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Last successful commit ID
+    - name: Last successful commit ID # Action to find last successful commit of workflow
       uses: grace-matson/last-successful-build-action@v2.0.7
       id: last_successful_commit
       with:

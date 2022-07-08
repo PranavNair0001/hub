@@ -5,7 +5,7 @@ import yaml
 import re
 import logging
 
-logging.getLogger().setLevel(logging.INFO)    # Enable logging in GitHub Workflow
+logging.getLogger().setLevel(logging.INFO)    # Enable logging in GitHub Workflow and enable printing of info level logs
 
 class LazyDecoder(json.JSONDecoder):
   def decode(self, s, **kwargs):
@@ -27,6 +27,7 @@ def get_missing_files():
   files = []
   ids = []
   packagesDir = 'packages/'
+
   for artifact in os.listdir(packagesDir):
     artifactDir = os.path.join(packagesDir, artifact)
     if(os.path.isdir(artifactDir)):
@@ -41,6 +42,7 @@ def get_missing_files():
             specData = json.load(specFile, cls=LazyDecoder)
             jarFiles = []
             configFiles = []
+
             for object in specData['actions']:
               for property in object['arguments']:
                 if(property['name'] == 'jar'):
