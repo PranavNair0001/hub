@@ -2,7 +2,8 @@ name: hub-release-automation
 
 on:
   workflow_dispatch    # Manual trigger event to execute workflow
-
+concurrency:
+  group: automation
 jobs:
 
   setup-build-and-list-files:    # Job to build packages.json file, find and list missing files
@@ -89,6 +90,17 @@ jobs:
     - name: Run Script    # Step to execute merge.py script that performs operations of this job
       run: python3 ./.github/scripts/merge.py
 
+    - name: Syncing master bucket
+      uses: nick-fields/retry@v2
+      with:
+        timeout_seconds: 15
+        max_attempts: 3
+        retry_on: error
+        on_retry_command: echo "The upload to central bucket has failed"
+        command: |
+          python3 ./.github/scripts/sync_main.py
+
+
   sync-regional-buckets:    # Job to sync all regional GCS buckets with central GCS bucket, in parallel
     runs-on: new-runner
     needs: merge-files
@@ -100,7 +112,6 @@ jobs:
         loc: [ "dir1" , "dir2", "dir3", "dir4","dir5", "dir6", "dir7", "dir8", "dir9" ]
 
     steps:
-
     - name: Syncing buckets, max 3 retries    # Action to sync bucket, and retry upto 3 times if failed
       uses: nick-fields/retry@v2
       with:
@@ -110,51 +121,78 @@ jobs:
         on_retry_command: echo "The upload to ${{matrix.loc}} has failed"
         command: gsutil -m rsync -d -r gs://project-step-pranav-hub-cdap-io-master/ gs://project-step-pranav-hub-cdap-io-${{ matrix.loc }}/
 
-  failure_mode:    # Job to mail and notify concerned persons, if workflow fails
+
+  failure_mode: # Job to mail and notify concerned persons, if workflow fails
     runs-on: new-runner
     if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
-    needs: sync-regional-buckets
+    needs: [ sync_regional_buckets, merge_files]
     steps:
+    - name: Revert changes checkout # Action to access file structure of repository in runner
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
-    - run: echo ${{needs.matrix_regional_buckets.result}}
+    - name: Last successful commit ID
+      uses: grace-matson/last-successful-build-action@v2.0.7
+      id: last_successful_commit
+      with:
+        token: ${{ github.token }}
+        branch: ${{ github.ref_name }}
+        workflow: ${{ github.workflow }}
+        verify: true
 
-    - name: Failure, sending email    # Action to send mail
+    - name: Commit hash
+      run: |
+        echo "Last commit before current run: ${{github.sha}}"
+        echo "Last successful commit: ${{ steps.last_successful_commit.outputs.sha }}"
+
+    - name: Revert changes #Action to revert file structure to commit on which workflow was last successful
+      if: always()
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
+        git read-tree -u --reset ${{ steps.last_successful_commit.outputs.sha }}
+        git status
+        git add .
+        git commit -m "Trying to revert to ${{ steps.last_successful_commit.outputs.sha }}"
+
+
+    - name: Create Pull Request for Revert # Action to create a pull request for revert of breaking changes
+      uses: peter-evans/create-pull-request@v3.10.0
+      id: create_pr
+      with:
+        token: ${{ github.token }}
+        title: 'Automated PR due to failed workflow - ${{ github.workflow }}'
+        body: |
+          This PR is to revert from commit ${{github.sha}} to ${{ steps.last_successful_commit.outputs.sha }} 
+          because workflow ${{ github.workflow }} failed on run ${{github.run_id}}
+          Please delete branch revert-${{github.run_id}} once PR is merged.
+        branch: revert-${{github.run_id}}
+
+    - name: Failure, sending email #Action to send email to concerned persons with information regarding failed workflow
       uses: dawidd6/action-send-mail@v3
       with:
         server_address: smtp.gmail.com
         server_port: 465
         username: ${{secrets.MAIL_USERNAME}}
         password: ${{secrets.MAIL_PASSWORD}}
-        subject: Github Action FAILED
-        to: pranavnair@google.com
-        from: HUB DEMO OFFICIAL
+        subject: Failure of Github workflow run ${{ github.workflow	}} in ${{github.repository}}
+        to: gracematson@google.com, pranavnair@google.com
+        from: Hub Release Automation Process
         secure: true
-        body: Build job of ${{github.repository}} was a failure on job
-
-
-#       - name: Revert changes checkout
-#         uses: actions/checkout@v2
-#         with:
-#           fetch-depth: 2
+        body: |
+          Repository : ${{github.repository}} 
+          Repo URL : ${{ github.repositoryUrl }}
+          Workflow : ${{ github.workflow	}}
+          Run : ${{ github.run_id }}
+          Last commit before failed workflow execution : ${{github.sha}}
+          Last commit before successful workflow : ${{ steps.last_successful_commit.outputs.sha }}
+          PR created on branch revert-${{github.run_id}}
+          URL of PR : ${{ steps.create_pr.outputs.pull-request-url }}
+          PR number : ${{ steps.create_pr.outputs.pull-request-number }}
       
-#       - name: Declare some variables
-#         id: vars
-#         shell: bash
-#         run: |
-#           echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-#           echo "::set-output name=sha_short::$(git rev-parse --short HEAD~1)"
-
-#       - name: Another step
-#         run: |
-#           echo "Branch: ${{ steps.vars.outputs.branch }}"
-#           echo "Sha: ${{ steps.vars.outputs.sha_short }}"
-
-#       - name: Revert changes
-#         run: |
-#           git config user.name grace-matson
-#           git config user.email gracematson@google.com
-#           git reset --merge ${{ steps.vars.outputs.sha_short }}
-#           git push -f
       
+      
+
 
 
