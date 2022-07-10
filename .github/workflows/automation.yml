@@ -95,7 +95,7 @@ jobs:
     - name: Syncing master bucket
       uses: nick-fields/retry@v2
       with:
-        timeout_seconds: 15
+        timeout_seconds: 180
         max_attempts: 3
         retry_on: error
         on_retry_command: echo "The upload to central bucket has failed"
@@ -116,7 +116,7 @@ jobs:
     - name: Syncing buckets, max 3 retries    # Action to sync bucket, and retry upto 3 times if failed
       uses: nick-fields/retry@v2
       with:
-        timeout_seconds: 15
+        timeout_seconds: 180
         max_attempts: 3
         retry_on: error
         on_retry_command: echo "The upload to ${{matrix.loc}} has failed"
