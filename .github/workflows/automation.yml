@@ -2,8 +2,10 @@ name: hub-release-automation
 
 on:
   workflow_dispatch    # Manual trigger event to execute workflow
+
 concurrency:
   group: automation
+
 jobs:
 
   setup-build-and-list-files:    # Job to build packages.json file, find and list missing files
@@ -97,8 +99,7 @@ jobs:
         max_attempts: 3
         retry_on: error
         on_retry_command: echo "The upload to central bucket has failed"
-        command: |
-          python3 ./.github/scripts/sync_main.py
+        command: python3 ./.github/scripts/sync.py
 
 
   sync-regional-buckets:    # Job to sync all regional GCS buckets with central GCS bucket, in parallel
@@ -125,7 +126,7 @@ jobs:
   failure_mode: # Job to mail and notify concerned persons, if workflow fails
     runs-on: new-runner
     if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
-    needs: [ sync_regional_buckets, merge_files]
+    needs: [ sync-regional-buckets, merge-files]
     steps:
     - name: Revert changes checkout # Action to access file structure of repository in runner
       uses: actions/checkout@v2
