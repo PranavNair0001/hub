@@ -41,7 +41,7 @@ def run_shell_command(cmd):
   process = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   if(process.returncode != 0):
     print('Process completed with error: ', process.stderr)
-  assert process.returncode == 0
+  # assert process.returncode == 0
 
 def get_missing_files():
   files = []
