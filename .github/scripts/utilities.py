@@ -18,7 +18,7 @@ class LazyDecoder(json.JSONDecoder):
     return super().decode(s, **kwargs)
 
 def run_shell_command(cmd):
-  process = subprocess.run(cmd, stderr=subprocess.PIPE, shell=True, stdout=subprocess.STDOUT)
+  process = subprocess.run(cmd, stderr=subprocess.PIPE, shell=True, stdout=subprocess.PIPE)
   if(process.returncode != 0):
     print('Process completed with error: ', process.stderr)
   assert process.returncode == 0
