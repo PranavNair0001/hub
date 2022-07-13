@@ -26,7 +26,7 @@ def run(command):
       break
     yield line.decode('utf-8')
 
-def run_command(command):
+def run_shell_command(command):
   process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
   while True:
     output = process.stdout.readline().rstrip().decode('utf-8')
@@ -37,11 +37,11 @@ def run_command(command):
   rc = process.poll()
   return rc
 
-def run_shell_command(cmd):
-  process = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-  if(process.returncode != 0):
-    print('Process completed with error: ', process.stderr)
-  # assert process.returncode == 0
+# def run_shell_command(cmd):
+#   process = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+#   if(process.returncode != 0):
+#     print('Process completed with error: ', process.stderr)
+#   assert process.returncode == 0
 
 def get_missing_files():
   files = []
