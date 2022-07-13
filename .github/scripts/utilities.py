@@ -1,6 +1,5 @@
 import os
 import subprocess
-import shlex
 import json
 import yaml
 import re
@@ -18,27 +17,8 @@ class LazyDecoder(json.JSONDecoder):
       s = regex.sub(replacement, s)
     return super().decode(s, **kwargs)
 
-def run(command):
-  process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-  while True:
-    line = process.stdout.readline().rstrip()
-    if not line:
-      break
-    yield line.decode('utf-8')
-
-def run_command(command):
-  process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
-  while True:
-    output = process.stdout.readline().rstrip().decode('utf-8')
-    if output == '' and process.poll() is not None:
-      break
-    if output:
-      print(output.strip())
-  rc = process.poll()
-  return rc
-
 def run_shell_command(cmd):
-  process = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  process = subprocess.run(cmd, stderr=subprocess.PIPE, shell=True)
   if(process.returncode != 0):
     print('Process completed with error: ', process.stderr)
   assert process.returncode == 0
