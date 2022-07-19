@@ -24,7 +24,7 @@ toFetch, ids = utilities.get_missing_files()
 # Every missing file downloaded in ./artifact directory is placed in appropriate location
 for file in toFetch:
   fileName = file.split('/')[3]
-  logging.info('Merging missing file: ' + fileName)
+  logging.debug('Merging missing file: ' + fileName)
   if(os.path.isfile(os.path.join('artifacts', fileName, fileName))):
     shutil.move(os.path.join('artifacts', fileName, fileName), file)
   else:

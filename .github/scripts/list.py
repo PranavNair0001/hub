@@ -35,8 +35,8 @@ for i in range(len(toFetch)):
   jsonStr += '{\"path\":\"%s\",\"target_path\":\"artifact/%s\",\"artifact\":\"%s\",\"artifactDir\":\"%s\",\"repo\":{\"id\":\"%s\",\"file_type\":\"%s\"}},' %(toFetch[i], toFetch[i].split('/')[3], toFetch[i].split('/')[3], toFetch[i].rsplit('/', 1)[0], ids[i], extension)
 
 output = '[' + jsonStr[:-1] + ']'
-logging.info('Output of list.py: ')
-logging.info(json.dumps(json.loads(output), indent=2))    # Pretty print JSON output
+logging.debug('Output of list.py: ')
+logging.debug(json.dumps(json.loads(output), indent=2))    # Pretty print JSON output
 
 # Example Output:
 # [

@@ -52,13 +52,13 @@ def get_missing_files():    # Utility function to get list of missing artifact f
   for artifact in os.listdir(packagesDir):
     artifactDir = os.path.join(packagesDir, artifact)
     if(os.path.isdir(artifactDir)):
-      logging.info('Checking artifact: ' + artifact)
+      logging.debug('Checking artifact: ' + artifact)
       for version in os.listdir(artifactDir):
         artifactVersionDir = os.path.join(artifactDir, version)
         if(os.path.isdir(artifactVersionDir)):
-          logging.info('Checking missing files in ' + artifactVersionDir)
+          logging.debug('Checking missing files in ' + artifactVersionDir)
           if(os.path.isfile(os.path.join(artifactVersionDir, 'spec.json'))):
-            logging.info('Inspecting spec.json for necessary files')
+            logging.debug('Inspecting spec.json for necessary files')
             specFile = open(os.path.join(artifactVersionDir, 'spec.json'))
             specData = json.load(specFile, cls=LazyDecoder)
             jarFiles = []
@@ -79,9 +79,9 @@ def get_missing_files():    # Utility function to get list of missing artifact f
                   else:
                     configFiles.append(property['value'])
 
-            logging.info('Required files: ')
-            logging.info(jarFiles)
-            logging.info(configFiles)
+            logging.debug('Required files: ')
+            logging.debug(jarFiles)
+            logging.debug(configFiles)
 
             for fileList in [jarFiles, configFiles]:
               for file in fileList:
@@ -93,7 +93,7 @@ def get_missing_files():    # Utility function to get list of missing artifact f
                     artifactId = buildData['maven-central']['artifactId']
                     files.append(os.path.join(artifactVersionDir, file))
                     ids.append('%s:%s:%s' %(groupId, artifactId, version))
-                    logging.info('Missing file: ' + file)
+                    logging.debug('Missing file: ' + file)
                   else:
                     logging.warning('build.yaml file does not exist for ' + artifactDir)
                     files.append(os.path.join(artifactVersionDir, file))

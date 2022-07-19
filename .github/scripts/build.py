@@ -19,25 +19,25 @@ import utilities
 logging.getLogger().setLevel(logging.DEBUG)    # Enable logging in GitHub Workflow and enable printing of info level logs
 
 # Initial environment and version check logs
-logging.info('Starting Setup and Build of Packager, packages.json  ....')
-logging.info('Checking environment ....\n')
+logging.debug('Starting Setup and Build of Packager, packages.json  ....')
+logging.debug('Checking environment ....\n')
 
-logging.info('Java version: ')
+logging.debug('Java version: ')
 utilities.run_shell_command('java -version')
 
-logging.info('Java compile version: ')
+logging.debug('Java compile version: ')
 utilities.run_shell_command('javac -version')
 
-logging.info('Maven version: ')
+logging.debug('Maven version: ')
 utilities.run_shell_command('mvn -version')
 
 # Building packager and packages
-logging.info('Building packager ....\n')
+logging.debug('Building packager ....\n')
 os.chdir('./packager/')
 utilities.run_shell_command('mvn clean package')
 os.chdir('../')
 
-logging.info('Building packages.json ....\n')
+logging.debug('Building packages.json ....\n')
 utilities.run_shell_command('java -cp "packager/target/lib/*:packager/target/*" io.cdap.hub.Tool build')
 
 # Listing all files
