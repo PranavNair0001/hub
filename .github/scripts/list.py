@@ -1,3 +1,17 @@
+# Copyright © 2022 Cask Data, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+
+# http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
 import json
 import os
 import logging
@@ -11,7 +25,7 @@ logging.info('Missing files before retrieval are: ')
 for file in toFetch:
   logging.info(file)
 
-logging.info('Maven IDs of corresponding missing files are: ')
+logging.info('Maven GroupID:ArtifactID:Version of corresponding missing files are: ')
 for id in ids:
   logging.info(id)
 
@@ -23,6 +37,20 @@ for i in range(len(toFetch)):
 output = '[' + jsonStr[:-1] + ']'
 logging.info('Output of list.py: ')
 logging.info(json.dumps(json.loads(output), indent=2))    # Pretty print JSON output
+
+# Example Output:
+# [
+#       {
+#           "path": "packages/hydrator-plugin-gcp-plugins/0.15.2/google-cloud-0.15.2.jar",
+#           "target_path": "artifact/google-cloud-0.15.2.jar",
+#           "artifact": "google-cloud-0.15.2.jar",
+#           "artifactDir": "packages/hydrator-plugin-gcp-plugins/0.15.2",
+#           "repo": {
+#                 "id": "io.cdap.plugin:google-cloud:0.15.2",
+#                 "file_type": "jar"
+#           }
+#     }
+# ]
 
 # Set output as environment variable of GitHub workflow runner
 env_file = os.getenv('GITHUB_ENV')
