@@ -13,7 +13,7 @@ for file in toFetch:
   if(os.path.isfile(os.path.join('artifacts', fileName, fileName))):
     shutil.move(os.path.join('artifacts', fileName, fileName), file)
   else:
-    logging.info(file + ' : not retrieved')
+    logging.info('WARNING: ' + file + ' : not retrieved')
 
 shutil.move(os.path.join('artifacts', 'packages.json', 'packages.json'), 'packages.json')
 

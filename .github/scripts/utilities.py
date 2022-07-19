@@ -26,7 +26,7 @@ def run(command):
       break
     yield line.decode('utf-8')
 
-def run_shell_command(command):
+def run_shell_command(command):    # Utility function to run shell commands with appropriate I/O streams
   process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
   while True:
     output = process.stdout.readline().rstrip().decode('utf-8')
@@ -37,16 +37,11 @@ def run_shell_command(command):
   rc = process.poll()
   return rc
 
-# def run_shell_command(cmd):
-#   process = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-#   if(process.returncode != 0):
-#     print('Process completed with error: ', process.stderr)
-#   assert process.returncode == 0
-
-def get_missing_files():
+def get_missing_files():    # Utility function to get list of missing artifact files
   files = []
   ids = []
   packagesDir = 'packages/'
+  ignorableActionTypes = ['create_driver_artifact']
 
   for artifact in os.listdir(packagesDir):
     artifactDir = os.path.join(packagesDir, artifact)
@@ -64,14 +59,24 @@ def get_missing_files():
             configFiles = []
 
             for object in specData['actions']:
-              for property in object['arguments']:
-                if(property['name'] == 'jar'):
-                  jarFiles.append(property['value'])
-                if(property['name'] == 'config'):
-                  configFiles.append(property['value'])
+                for property in object['arguments']:
+                  if(property['name'] == 'jar'):
+                    if(object['type'] in ignorableActionTypes):
+                      if(not os.path.isfile(os.path.join(artifactVersionDir, property['value']))):
+                        logging.info('WARNING: ' + os.path.join(artifactVersionDir, property['value']) + ' not found')
+                    else:
+                      jarFiles.append(property['value'])
+                  if(property['name'] == 'config'):
+                    if(object['type'] in ignorableActionTypes):
+                      if(not os.path.isfile(os.path.join(artifactVersionDir, property['value']))):
+                        logging.info('WARNING: ' + os.path.join(artifactVersionDir, property['value']) + ' not found')
+                    else:
+                      configFiles.append(property['value'])
+
             logging.info('Required files: ')
             logging.info(jarFiles)
             logging.info(configFiles)
+
             for jarFile in jarFiles:
               if(not os.path.isfile(os.path.join(artifactVersionDir, jarFile))):
                 if(os.path.isfile(os.path.join(artifactDir, 'build.yaml'))):
@@ -86,6 +91,7 @@ def get_missing_files():
                   logging.info('WARNING: build.yaml file does not exist for ' + artifactDir)
                   files.append(os.path.join(artifactVersionDir, jarFile))
                   ids.append('::%s' %(version))
+
             for configFile in configFiles:
               if(not os.path.isfile(os.path.join(artifactVersionDir, configFile))):
                 if(os.path.isfile(os.path.join(artifactDir, 'build.yaml'))):
@@ -98,11 +104,13 @@ def get_missing_files():
                   logging.info('Missing file: ' + configFile)
                 else:
                   logging.info('WARNING: build.yaml file does not exist for ' + artifactDir)
-                  files.append(os.path.join(artifactVersionDir, jarFile))
+                  files.append(os.path.join(artifactVersionDir, configFile))
                   ids.append('::%s' %(version))
+
           else:
             logging.info('ERROR: spec.json does not exist for ' + artifactVersionDir)
             exit(1)
+
   return files, ids
 
 def gcs_sync_dir(source, destination, ignore=False):
