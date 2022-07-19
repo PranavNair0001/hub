@@ -120,7 +120,7 @@ jobs:
         max_attempts: 3
         retry_on: error
         on_retry_command: echo "The upload to ${{matrix.loc}} has failed"
-        command: gsutil -m rsync -d -r gs://project-step-pranav-hub-cdap-io-master/ gs://project-step-pranav-hub-cdap-io-${{ matrix.loc }}/
+        command: gsutil -m rsync -d -i -r gs://project-step-pranav-hub-cdap-io-master/ gs://project-step-pranav-hub-cdap-io-${{ matrix.loc }}/
 
 
   failure_mode: # Job to mail and notify concerned persons, if workflow fails
