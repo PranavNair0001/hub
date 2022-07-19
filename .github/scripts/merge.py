@@ -3,7 +3,7 @@ import shutil
 import logging
 import utilities
 
-logging.getLogger().setLevel(logging.INFO)    # Enable logging in GitHub Workflow
+logging.getLogger().setLevel(logging.DEBUG)    # Enable logging in GitHub Workflow
 
 toFetch, ids = utilities.get_missing_files()
 

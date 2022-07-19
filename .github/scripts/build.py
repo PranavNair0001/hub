@@ -2,7 +2,7 @@ import os
 import logging
 import utilities
 
-logging.getLogger().setLevel(logging.INFO)    # Enable logging in GitHub Workflow and enable printing of info level logs
+logging.getLogger().setLevel(logging.DEBUG)    # Enable logging in GitHub Workflow and enable printing of info level logs
 
 # Initial environment and version check logs
 logging.info('Starting Setup and Build of Packager, packages.json  ....')

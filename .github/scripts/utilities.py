@@ -6,7 +6,7 @@ import yaml
 import re
 import logging
 
-logging.getLogger().setLevel(logging.INFO)    # Enable logging in GitHub Workflow and enable printing of info level logs
+logging.getLogger().setLevel(logging.DEBUG)    # Enable logging in GitHub Workflow and enable printing of info level logs
 
 class LazyDecoder(json.JSONDecoder):
   def decode(self, s, **kwargs):

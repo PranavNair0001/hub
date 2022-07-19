@@ -3,7 +3,7 @@ import os
 import logging
 import utilities
 
-logging.getLogger().setLevel(logging.INFO)    # Enable logging in GitHub Workflow and enable printing of info level logs
+logging.getLogger().setLevel(logging.DEBUG)    # Enable logging in GitHub Workflow and enable printing of info level logs
 
 #Creating artifact directory
 logging.info('Creating temporary \'artifact/\' directory')
