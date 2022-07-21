@@ -19,6 +19,6 @@ env_file = os.getenv('GITHUB_ENV')
 with open(env_file, "a") as myfile:
     myfile.write("buckets=" + str(output))
 
-utilities.run_shell_command('gsutil -m rsync -d -c -r -n packages/ gs://' + central_bucket + '/packages/')
+utilities.run_shell_command('gsutil -m rsync -d -c -r packages/ gs://' + central_bucket + '/packages/')
 utilities.run_shell_command('gsutil cp -n categories.json gs://' + central_bucket + '/categories.json')
 utilities.run_shell_command('gsutil cp -n packages.json gs://' + central_bucket + '/packages.json')
