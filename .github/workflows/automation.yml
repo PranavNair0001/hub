@@ -125,10 +125,7 @@ jobs:
         max_attempts: 3
         retry_on: any
         on_retry_command: echo "The upload to ${{ matrix.loc.regional_address }} has failed"
-        command: |
-          gsutil -m rsync -d -c -r -n ${{ matrix.loc.central_address }}/packages ${{ matrix.loc.regional_address }} 
-          gsutil cp -n ${{ matrix.loc.central_address }}/packages.json ${{ matrix.loc.regional_address }}
-          gsutil cp -n ${{ matrix.loc.central_address }}/categories.json ${{ matrix.loc.regional_address }}
+        command: gsutil -m rsync -r -d -n -c ${{ matrix.loc.central_address }}/ ${{ matrix.loc.regional_address }}/
 
   failure_mode: # Job to mail and notify concerned persons, if workflow fails
     runs-on: new-runner
