@@ -9,7 +9,7 @@ central_bucket, regional_buckets = utilities.get_bucket_list()
 
 jsonStr = ''
 for bucket in regional_buckets:
-    jsonStr += '{\"central_address\":\"%s\",\"regional_address\":\"%s\"},' %('gs://' + central_bucket, 'gs://project-step-pranav-hub-cdap-io/' + bucket)
+    jsonStr += '{\"central_address\":\"%s\",\"regional_address\":\"%s\"},' %('gs://' + central_bucket, 'gs://project-step-pranav-hub-cdap-io-' + bucket)
 
 output = '[' + jsonStr[:-1] + ']'
 logging.debug('Output of list.py: ')
