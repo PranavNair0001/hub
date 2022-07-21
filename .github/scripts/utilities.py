@@ -103,3 +103,12 @@ def get_missing_files():    # Utility function to get list of missing artifact f
             exit(1)
 
   return files, ids
+
+def get_bucket_list():
+
+  bucketFile = os.open(os.path.join('.github', 'scripts', 'temp.yaml'))
+  bucketData = yaml.load(bucketFile, Loader=yaml.FullLoader)
+  central_bucket = bucketData['central-bucket']
+  regional_buckets = list(bucketData['regional-buckets'])
+
+  return central_bucket, regional_buckets

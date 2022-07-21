@@ -100,6 +100,13 @@ jobs:
         on_retry_command: echo "The upload to central bucket has failed"
         command: python3 ./.github/scripts/sync.py
 
+    - name: Setting Output    # Step to set resultant list as output of job
+      id: set-buckets
+      run: echo "::set-output name=buckets::${buckets}"
+
+    outputs:
+      matrix: ${{ steps.set-buckets.outputs.buckets }}    # JSON output containing contents of strategy matrix of next job
+
 
   sync-regional-buckets:    # Job to sync all regional GCS buckets with central GCS bucket, in parallel
     runs-on: new-runner
@@ -108,7 +115,7 @@ jobs:
 
     strategy:
       matrix:
-        loc: [ "dir1" , "dir2", "dir3", "dir4","dir5", "dir6", "dir7", "dir8", "dir9" ]
+        loc: ${{ fromJSON(needs.merge-files.outputs.matrix) }}
 
     steps:
     - name: Syncing buckets, max 3 retries    # Action to sync bucket, and retry upto 3 times if failed
@@ -117,8 +124,8 @@ jobs:
         timeout_seconds: 1200
         max_attempts: 3
         retry_on: error
-        on_retry_command: echo "The upload to ${{matrix.loc}} has failed"
-        command: gsutil -m rsync -d -c -r gs://project-step-pranav-hub-cdap-io-master/ gs://project-step-pranav-hub-cdap-io-${{ matrix.loc }}/
+        on_retry_command: echo "The upload to ${{ matrix.loc.regional_address }} has failed"
+        command: gsutil -m rsync -d -c -r ${{ matrix.loc.central_address }} ${{ matrix.loc.regional_address }}
 
 
   failure_mode: # Job to mail and notify concerned persons, if workflow fails
